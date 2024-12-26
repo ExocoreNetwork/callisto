@@ -43,7 +43,9 @@ CREATE TABLE transaction
     success      BOOLEAN NOT NULL,
 
     /* Body */
-    messages     JSON    NOT NULL DEFAULT '[]'::JSON,
+    /* JSONB is used for faster indexing within a Cosmos tx, at the cost
+    of slower insertion. */
+    messages     JSONB    NOT NULL DEFAULT '[]'::JSONB,
     memo         TEXT,
     signatures   TEXT[]  NOT NULL,
 
@@ -81,7 +83,8 @@ CREATE TABLE message
     transaction_hash            TEXT   NOT NULL,
     index                       BIGINT NOT NULL,
     type                        TEXT   NOT NULL REFERENCES message_type(type),
-    value                       JSON   NOT NULL,
+    /* JSONB is used for faster indexing at the cost of slower insertion. */
+    value                       JSONB   NOT NULL,
     involved_accounts_addresses TEXT[] NOT NULL,
 
     /* PSQL partition */

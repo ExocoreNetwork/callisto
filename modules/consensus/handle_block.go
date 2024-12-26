@@ -36,11 +36,6 @@ func (m *Module) updateBlockTimeFromGenesis(block *tmctypes.ResultBlock) error {
 		return fmt.Errorf("genesis table is empty")
 	}
 
-	// Skip if the genesis does not exist
-	if genesis == nil {
-		return nil
-	}
-
 	newBlockTime := block.Block.Time.Sub(genesis.Time).Seconds() / float64(block.Block.Height-genesis.InitialHeight)
 	return m.db.SaveAverageBlockTimeGenesis(newBlockTime, block.Block.Height)
 }

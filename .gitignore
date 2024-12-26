@@ -9,3 +9,7 @@ config.yaml
 
 # Coverage
 coverage.*
+
+# Docker SQL data for dev
+db_data
+.env

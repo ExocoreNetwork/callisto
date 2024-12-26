@@ -1,0 +1,60 @@
+services:
+  cleanup:
+    # this is for dev only. cleanup and restart quickly.
+    # not done within setup to prevent conflict with running postgres image.
+    # use postgres and not alpine because rm is available in both.
+    image: postgres:15
+    container_name: bdjuno-cleanup
+    command: >
+      sh -c "
+      if [ \"${RESET_DB}\" = \"true\" ]; then
+        echo 'RESET_DB is true. Cleaning up db_data...';
+        rm -rf /var/lib/postgresql/data/*;
+      else
+        echo 'RESET_DB is false. Skipping cleanup.';
+      fi"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    environment:
+      RESET_DB: "${RESET_DB:-false}"
+
+  db:
+    image: postgres:15
+    container_name: bdjuno-db
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-changeme}"
+      # set up a default database, which is not used further.
+      # apparently this helps to avoid some issues with the postgres image
+      POSTGRES_DB: "${POSTGRES_DB:-postgresdb}"
+      UID: "${UID:-1000}"
+      GID: "${GID:-1000}"
+    depends_on:
+      cleanup:
+        condition: service_completed_successfully
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+
+  setup:
+    image: postgres:15
+    container_name: bdjuno-setup
+    depends_on:
+      db:
+        condition: service_started
+    volumes:
+      # Mount the folder that has all your .sql files
+      - ./database/schema:/schema
+    environment:
+      # User and password for bdjuno DB
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-changeme}"
+      BDJUNO_USER: "${BDJUNO_USER:-bdjuno}"
+      BDJUNO_PASSWORD: "${BDJUNO_PASSWORD:-changeme}"
+      POSTGRES_DB: "${POSTGRES_DB:-postgresdb}"
+      UID: "${UID:-1000}"
+      GID: "${GID:-1000}"
+      # will only do something if RESET_DB is true
+      RESET_DB: "${RESET_DB:-false}"
+    entrypoint: ["/bin/bash", "/schema/setup-entrypoint.sh"]
