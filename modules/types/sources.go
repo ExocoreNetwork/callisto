@@ -4,18 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"cosmossdk.io/simapp"
+	simappparams "cosmossdk.io/simapp/params"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/forbole/juno/v5/node/remote"
 	"github.com/forbole/juno/v5/types/params"
 
+	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/forbole/juno/v5/node/local"
 
 	nodeconfig "github.com/forbole/juno/v5/node/config"
@@ -23,29 +19,24 @@ import (
 	banksource "github.com/forbole/callisto/v4/modules/bank/source"
 	localbanksource "github.com/forbole/callisto/v4/modules/bank/source/local"
 	remotebanksource "github.com/forbole/callisto/v4/modules/bank/source/remote"
-	distrsource "github.com/forbole/callisto/v4/modules/distribution/source"
-	remotedistrsource "github.com/forbole/callisto/v4/modules/distribution/source/remote"
-	govsource "github.com/forbole/callisto/v4/modules/gov/source"
-	localgovsource "github.com/forbole/callisto/v4/modules/gov/source/local"
-	remotegovsource "github.com/forbole/callisto/v4/modules/gov/source/remote"
-	mintsource "github.com/forbole/callisto/v4/modules/mint/source"
-	localmintsource "github.com/forbole/callisto/v4/modules/mint/source/local"
-	remotemintsource "github.com/forbole/callisto/v4/modules/mint/source/remote"
+	epochssource "github.com/forbole/callisto/v4/modules/epochs/source"
+	localepochssource "github.com/forbole/callisto/v4/modules/epochs/source/local"
+	remoteepochssource "github.com/forbole/callisto/v4/modules/epochs/source/remote"
 	slashingsource "github.com/forbole/callisto/v4/modules/slashing/source"
 	localslashingsource "github.com/forbole/callisto/v4/modules/slashing/source/local"
 	remoteslashingsource "github.com/forbole/callisto/v4/modules/slashing/source/remote"
-	stakingsource "github.com/forbole/callisto/v4/modules/staking/source"
-	localstakingsource "github.com/forbole/callisto/v4/modules/staking/source/local"
-	remotestakingsource "github.com/forbole/callisto/v4/modules/staking/source/remote"
+
+	exocoreapp "github.com/ExocoreNetwork/exocore/app"
 )
 
 type Sources struct {
-	BankSource     banksource.Source
-	DistrSource    distrsource.Source
-	GovSource      govsource.Source
-	MintSource     mintsource.Source
+	BankSource banksource.Source
+	// DistrSource    distrsource.Source
+	// GovSource      govsource.Source
+	// MintSource     mintsource.Source
 	SlashingSource slashingsource.Source
-	StakingSource  stakingsource.Source
+	// StakingSource  stakingsource.Source
+	EpochsSource epochssource.Source
 }
 
 func BuildSources(nodeCfg nodeconfig.Config, encodingConfig params.EncodingConfig) (*Sources, error) {
@@ -66,17 +57,19 @@ func buildLocalSources(cfg *local.Details, encodingConfig params.EncodingConfig)
 		return nil, err
 	}
 
-	app := simapp.NewSimApp(
-		log.NewTMLogger(log.NewSyncWriter(os.Stdout)), source.StoreDB, nil, true, nil, nil,
+	app := exocoreapp.NewExocoreApp(
+		log.NewTMLogger(log.NewSyncWriter(os.Stdout)), source.StoreDB, nil, true, nil, cfg.Home,
+		0, simappparams.EncodingConfig{}, nil, nil,
 	)
 
 	sources := &Sources{
 		BankSource: localbanksource.NewSource(source, banktypes.QueryServer(app.BankKeeper)),
 		// DistrSource:    localdistrsource.NewSource(source, distrtypes.QueryServer(app.DistrKeeper)),
-		GovSource:      localgovsource.NewSource(source, govtypesv1.QueryServer(app.GovKeeper)),
-		MintSource:     localmintsource.NewSource(source, minttypes.QueryServer(app.MintKeeper)),
+		// GovSource:      localgovsource.NewSource(source, govtypesv1.QueryServer(app.GovKeeper)),
+		// MintSource:     localmintsource.NewSource(source, minttypes.QueryServer(app.MintKeeper)),
 		SlashingSource: localslashingsource.NewSource(source, slashingtypes.QueryServer(app.SlashingKeeper)),
-		StakingSource:  localstakingsource.NewSource(source, stakingkeeper.Querier{Keeper: app.StakingKeeper}),
+		EpochsSource:   localepochssource.NewSource(source, epochstypes.QueryServer(app.EpochsKeeper)),
+		// StakingSource:  localstakingsource.NewSource(source, stakingkeeper.Querier{Keeper: app.StakingKeeper}),
 	}
 
 	// Mount and initialize the stores
@@ -110,11 +103,12 @@ func buildRemoteSources(cfg *remote.Details) (*Sources, error) {
 	}
 
 	return &Sources{
-		BankSource:     remotebanksource.NewSource(source, banktypes.NewQueryClient(source.GrpcConn)),
-		DistrSource:    remotedistrsource.NewSource(source, distrtypes.NewQueryClient(source.GrpcConn)),
-		GovSource:      remotegovsource.NewSource(source, govtypesv1.NewQueryClient(source.GrpcConn)),
-		MintSource:     remotemintsource.NewSource(source, minttypes.NewQueryClient(source.GrpcConn)),
+		BankSource: remotebanksource.NewSource(source, banktypes.NewQueryClient(source.GrpcConn)),
+		// DistrSource:    remotedistrsource.NewSource(source, distrtypes.NewQueryClient(source.GrpcConn)),
+		// GovSource:      remotegovsource.NewSource(source, govtypesv1.NewQueryClient(source.GrpcConn)),
+		// MintSource:     remotemintsource.NewSource(source, minttypes.NewQueryClient(source.GrpcConn)),
 		SlashingSource: remoteslashingsource.NewSource(source, slashingtypes.NewQueryClient(source.GrpcConn)),
-		StakingSource:  remotestakingsource.NewSource(source, stakingtypes.NewQueryClient(source.GrpcConn)),
+		// StakingSource:  remotestakingsource.NewSource(source, stakingtypes.NewQueryClient(source.GrpcConn)),
+		EpochsSource: remoteepochssource.NewSource(source, epochstypes.NewQueryClient(source.GrpcConn)),
 	}, nil
 }

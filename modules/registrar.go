@@ -2,6 +2,7 @@ package modules
 
 import (
 	"github.com/forbole/callisto/v4/modules/actions"
+	"github.com/forbole/callisto/v4/modules/epochs"
 	"github.com/forbole/callisto/v4/modules/types"
 
 	"github.com/forbole/juno/v5/modules/pruning"
@@ -133,5 +134,6 @@ func (r *Registrar) BuildModules(ctx registrar.Context) jmodules.Modules {
 		// needs coingecko, so can't activate it yet.
 		// // pricefeed.NewModule(ctx.JunoConfig, cdc, db),
 		slashingModule,
+		epochs.NewModule(sources.EpochsSource, cdc, db),
 	}
 }
