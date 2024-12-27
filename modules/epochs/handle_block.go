@@ -15,7 +15,7 @@ func (m *Module) HandleBlock(
 	block *tmctypes.ResultBlock, res *tmctypes.ResultBlockResults, _ []*juno.Tx, _ *tmctypes.ResultValidators,
 ) error {
 	if err := m.saveEpochStates(block.Block.Height, res.BeginBlockEvents); err != nil {
-		return fmt.Errorf("rrror while saving epoch states: %s", err)
+		return fmt.Errorf("error while saving epoch states: %s", err)
 	}
 	return nil
 }

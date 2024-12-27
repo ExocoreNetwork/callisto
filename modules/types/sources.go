@@ -10,6 +10,8 @@ import (
 	"github.com/forbole/juno/v5/types/params"
 
 	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
+	exominttypes "github.com/ExocoreNetwork/exocore/x/exomint/types"
+
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/forbole/juno/v5/node/local"
@@ -19,12 +21,18 @@ import (
 	banksource "github.com/forbole/callisto/v4/modules/bank/source"
 	localbanksource "github.com/forbole/callisto/v4/modules/bank/source/local"
 	remotebanksource "github.com/forbole/callisto/v4/modules/bank/source/remote"
+
 	epochssource "github.com/forbole/callisto/v4/modules/epochs/source"
 	localepochssource "github.com/forbole/callisto/v4/modules/epochs/source/local"
 	remoteepochssource "github.com/forbole/callisto/v4/modules/epochs/source/remote"
+
 	slashingsource "github.com/forbole/callisto/v4/modules/slashing/source"
 	localslashingsource "github.com/forbole/callisto/v4/modules/slashing/source/local"
 	remoteslashingsource "github.com/forbole/callisto/v4/modules/slashing/source/remote"
+
+	exomintsource "github.com/forbole/callisto/v4/modules/exomint/source"
+	localexomintsource "github.com/forbole/callisto/v4/modules/exomint/source/local"
+	remoteexomintsource "github.com/forbole/callisto/v4/modules/exomint/source/remote"
 
 	exocoreapp "github.com/ExocoreNetwork/exocore/app"
 )
@@ -36,7 +44,8 @@ type Sources struct {
 	// MintSource     mintsource.Source
 	SlashingSource slashingsource.Source
 	// StakingSource  stakingsource.Source
-	EpochsSource epochssource.Source
+	EpochsSource  epochssource.Source
+	ExomintSource exomintsource.Source
 }
 
 func BuildSources(nodeCfg nodeconfig.Config, encodingConfig params.EncodingConfig) (*Sources, error) {
@@ -69,6 +78,7 @@ func buildLocalSources(cfg *local.Details, encodingConfig params.EncodingConfig)
 		// MintSource:     localmintsource.NewSource(source, minttypes.QueryServer(app.MintKeeper)),
 		SlashingSource: localslashingsource.NewSource(source, slashingtypes.QueryServer(app.SlashingKeeper)),
 		EpochsSource:   localepochssource.NewSource(source, epochstypes.QueryServer(app.EpochsKeeper)),
+		ExomintSource:  localexomintsource.NewSource(source, exominttypes.QueryServer(app.ExomintKeeper)),
 		// StakingSource:  localstakingsource.NewSource(source, stakingkeeper.Querier{Keeper: app.StakingKeeper}),
 	}
 
@@ -109,6 +119,7 @@ func buildRemoteSources(cfg *remote.Details) (*Sources, error) {
 		// MintSource:     remotemintsource.NewSource(source, minttypes.NewQueryClient(source.GrpcConn)),
 		SlashingSource: remoteslashingsource.NewSource(source, slashingtypes.NewQueryClient(source.GrpcConn)),
 		// StakingSource:  remotestakingsource.NewSource(source, stakingtypes.NewQueryClient(source.GrpcConn)),
-		EpochsSource: remoteepochssource.NewSource(source, epochstypes.NewQueryClient(source.GrpcConn)),
+		EpochsSource:  remoteepochssource.NewSource(source, epochstypes.NewQueryClient(source.GrpcConn)),
+		ExomintSource: remoteexomintsource.NewSource(source, exominttypes.NewQueryClient(source.GrpcConn)),
 	}, nil
 }

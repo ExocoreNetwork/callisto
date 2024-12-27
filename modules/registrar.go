@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/forbole/callisto/v4/modules/actions"
 	"github.com/forbole/callisto/v4/modules/epochs"
+	"github.com/forbole/callisto/v4/modules/exomint"
 	"github.com/forbole/callisto/v4/modules/types"
 
 	"github.com/forbole/juno/v5/modules/pruning"
@@ -135,5 +136,6 @@ func (r *Registrar) BuildModules(ctx registrar.Context) jmodules.Modules {
 		// // pricefeed.NewModule(ctx.JunoConfig, cdc, db),
 		slashingModule,
 		epochs.NewModule(sources.EpochsSource, cdc, db),
+		exomint.NewModule(sources.ExomintSource, cdc, db),
 	}
 }
