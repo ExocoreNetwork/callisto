@@ -1,0 +1,23 @@
+table:
+  name: operator_usd_values
+  schema: public
+object_relationships:
+- name: av
+  using:
+    foreign_key_constraint_on: avs_addr
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - operator_addr
+    - avs_addr
+    - self_usd_value
+    - total_usd_value
+    - other_usd_value
+    - active_usd_value
+    filter: {}
+    limit: 50
+  role: anonymous

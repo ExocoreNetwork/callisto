@@ -1,12 +1,11 @@
 table:
-  name: staking_params
+  name: last_total_power
   schema: public
 select_permissions:
 - permission:
     allow_aggregations: false
     columns:
-    - params
-    - height
+    - total_power
     filter: {}
     limit: 1
   role: anonymous

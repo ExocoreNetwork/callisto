@@ -1,18 +1,16 @@
 table:
-  name: validator_commission
+  name: staker_operator_association
   schema: public
 object_relationships:
-- name: validator
+- name: operator
   using:
-    foreign_key_constraint_on: validator_address
+    foreign_key_constraint_on: operator_addr
 select_permissions:
 - permission:
     allow_aggregations: false
     columns:
-    - validator_address
-    - commission
-    - min_self_delegation
-    - height
+    - staker_id
+    - operator_addr
     filter: {}
     limit: 100
   role: anonymous

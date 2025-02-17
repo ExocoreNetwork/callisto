@@ -1,0 +1,22 @@
+table:
+  name: message_type
+  schema: public
+array_relationships:
+- name: messages
+  using:
+    foreign_key_constraint_on:
+      column: type
+      table:
+        name: message
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - type
+    - module
+    - label
+    - height
+    filter: {}
+    limit: 10
+  role: anonymous

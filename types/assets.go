@@ -22,17 +22,13 @@ func NewAssetsParams(params assetstypes.Params, height int64) *AssetsParams {
 
 // StakerAsset is a helper struct with the state of a staker's asset. In
 // addition to the key (StakerID, AssetID) and the base structure used by the
-// x/assets module, it also contains the lifetime slashed amount and the
-// delegated amount. The lifetime slashed amount is derived from events,
-// and the deposited amount is calculated from the other parts.
+// x/assets module, it also contains the delegated amount, which is derived.
 type StakerAsset struct {
 	StakerID            string
 	AssetID             string
 	Deposited           string
 	Withdrawable        string
 	PendingUndelegation string
-	// AdditionalSlashed is non-cumulative in nature and may be "" to indicate no slashing
-	AdditionalSlashed string
 }
 
 // NewStakerAssetFromInfo creates a new StakerAsset instance from the given
@@ -40,7 +36,6 @@ type StakerAsset struct {
 func NewStakerAssetFromInfo(
 	stakerID string, assetID string,
 	info assetstypes.StakerAssetInfo,
-	additionalSlashed string, // may be "" to indicate no slashing
 ) *StakerAsset {
 	return &StakerAsset{
 		StakerID:            stakerID,
@@ -48,7 +43,6 @@ func NewStakerAssetFromInfo(
 		Deposited:           info.TotalDepositAmount.String(),
 		Withdrawable:        info.WithdrawableAmount.String(),
 		PendingUndelegation: info.PendingUndelegationAmount.String(),
-		AdditionalSlashed:   additionalSlashed,
 	}
 }
 
@@ -57,7 +51,6 @@ func NewStakerAssetFromInfo(
 func NewStakerAssetFromStr(
 	stakerID string, assetID string,
 	deposited string, withdrawable string, pendingUndelegation string,
-	additionalSlashed string, // may be "" to indicate no slashing
 ) *StakerAsset {
 	return &StakerAsset{
 		StakerID:            stakerID,
@@ -65,7 +58,6 @@ func NewStakerAssetFromStr(
 		Deposited:           deposited,
 		Withdrawable:        withdrawable,
 		PendingUndelegation: pendingUndelegation,
-		AdditionalSlashed:   additionalSlashed,
 	}
 }
 

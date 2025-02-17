@@ -1,0 +1,19 @@
+table:
+  name: exo_asset_delegation
+  schema: public
+object_relationships:
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - staker_id
+    - operator_addr
+    - delegated
+    - pending_undelegation
+    - lifetime_slashed
+    filter: {}
+    limit: 10
+  role: anonymous

@@ -1,0 +1,23 @@
+table:
+  name: operator_avs_opt_ins
+  schema: public
+object_relationships:
+- name: av
+  using:
+    foreign_key_constraint_on: avs_addr
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - operator_addr
+    - avs_addr
+    - slash_contract
+    - opt_in_height
+    - opt_out_height
+    - jailed
+    filter: {}
+    limit: 100
+  role: anonymous

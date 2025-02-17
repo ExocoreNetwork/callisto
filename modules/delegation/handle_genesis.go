@@ -54,8 +54,6 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 			delegation := types.NewExoAssetDelegationFromStr(
 				keys.StakerId, keys.OperatorAddr, delegatedAmount.String(),
 				state.States.WaitUndelegationAmount.String(),
-				// 0 lifetime slashed at genesis
-				"0",
 			)
 			if err := m.db.AccumulateExoAssetDelegation(delegation); err != nil {
 				return fmt.Errorf("error while accumulating exo asset delegation: %s", err)

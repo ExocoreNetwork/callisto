@@ -1,0 +1,17 @@
+table:
+  name: consensus_addrs_to_prune
+  schema: public
+object_relationships:
+- name: validator
+  using:
+    foreign_key_constraint_on: consensus_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - epoch_number
+    - consensus_addr
+    - completion_height
+    filter: {}
+    limit: 10
+  role: anonymous

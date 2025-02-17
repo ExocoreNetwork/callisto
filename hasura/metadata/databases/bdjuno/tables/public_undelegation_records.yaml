@@ -1,0 +1,37 @@
+table:
+  name: undelegation_records
+  schema: public
+object_relationships:
+- name: assets_token
+  using:
+    foreign_key_constraint_on: asset_id
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+- name: undelegation_maturity
+  using:
+    foreign_key_constraint_on:
+      column: undelegation_record_id
+      table:
+        name: undelegation_maturities
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - record_id
+    - staker_id
+    - asset_id
+    - operator_addr
+    - tx_hash
+    - block_number
+    - completed_epoch_identifier
+    - completed_epoch_number
+    - undelegation_id
+    - amount
+    - actual_completed_amount
+    - hold_count
+    - maturity_height
+    filter: {}
+    limit: 5
+  role: anonymous

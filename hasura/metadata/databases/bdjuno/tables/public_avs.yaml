@@ -1,0 +1,41 @@
+table:
+  name: avs
+  schema: public
+object_relationships:
+- name: avs_usd_value
+  using:
+    foreign_key_constraint_on:
+      column: avs_addr
+      table:
+        name: avs_usd_values
+        schema: public
+array_relationships:
+- name: chain_id_to_avs_addrs
+  using:
+    foreign_key_constraint_on:
+      column: avs_addr
+      table:
+        name: chain_id_to_avs_addr
+        schema: public
+- name: operator_avs_opt_ins
+  using:
+    foreign_key_constraint_on:
+      column: avs_addr
+      table:
+        name: operator_avs_opt_ins
+        schema: public
+- name: operator_usd_values
+  using:
+    foreign_key_constraint_on:
+      column: avs_addr
+      table:
+        name: operator_usd_values
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - avs_addr
+    filter: {}
+    limit: 10
+  role: anonymous

@@ -1,0 +1,22 @@
+table:
+  name: delegation_states
+  schema: public
+object_relationships:
+- name: assets_token
+  using:
+    foreign_key_constraint_on: asset_id
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - staker_id
+    - asset_id
+    - operator_addr
+    - undelegatable_share
+    - wait_undelegation_amount
+    filter: {}
+    limit: 10
+  role: anonymous

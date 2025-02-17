@@ -1,0 +1,26 @@
+table:
+  name: client_chains
+  schema: public
+array_relationships:
+- name: assets_tokens
+  using:
+    foreign_key_constraint_on:
+      column: layer_zero_chain_id
+      table:
+        name: assets_tokens
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - name
+    - meta_info
+    - chain_id
+    - exocore_chain_index
+    - finalization_blocks
+    - layer_zero_chain_id
+    - signature_type
+    - address_length
+    filter: {}
+    limit: 5
+  role: anonymous

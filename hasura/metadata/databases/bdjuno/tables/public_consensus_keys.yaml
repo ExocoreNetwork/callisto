@@ -1,0 +1,24 @@
+table:
+  name: consensus_keys
+  schema: public
+object_relationships:
+- name: chain_id_to_avs_addr
+  using:
+    foreign_key_constraint_on: chain_id
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - operator_addr
+    - chain_id
+    - pubkey_hex
+    - cons_addr
+    - prev_pubkey_hex
+    - prev_cons_addr
+    - is_removing
+    filter: {}
+    limit: 10
+  role: anonymous

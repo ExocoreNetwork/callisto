@@ -1,0 +1,24 @@
+table:
+  name: chain_id_to_avs_addr
+  schema: public
+object_relationships:
+- name: av
+  using:
+    foreign_key_constraint_on: avs_addr
+array_relationships:
+- name: consensus_keys
+  using:
+    foreign_key_constraint_on:
+      column: chain_id
+      table:
+        name: consensus_keys
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - chain_id
+    - avs_addr
+    filter: {}
+    limit: 10
+  role: anonymous

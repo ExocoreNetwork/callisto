@@ -53,6 +53,9 @@ func (m *Module) HandleTx(tx *juno.Tx) error {
 	if err := m.handleUndelegationSlashings(tx.Events); err != nil {
 		return fmt.Errorf("error while handling undelegation slashings: %s", err)
 	}
+	if err := m.handleDelegationSlashings(tx.Height, tx.Events); err != nil {
+		return fmt.Errorf("error while handling delegation slashings: %s", err)
+	}
 	return nil
 }
 
@@ -216,8 +219,7 @@ func (m *Module) handleExoAssetDelegations(events []abci.Event) error {
 			return fmt.Errorf("error while finding amount: %s", err)
 		}
 		delegation := types.NewExoAssetDelegationFromStr(
-			stakerID.Value, operatorAddr.Value, amount.Value,
-			"0", "0",
+			stakerID.Value, operatorAddr.Value, amount.Value, "0",
 		)
 		if err := m.db.AccumulateExoAssetDelegation(delegation); err != nil {
 			return fmt.Errorf("error while accumulating exo asset delegation: %s", err)

@@ -216,7 +216,6 @@ func (m *Module) handleStakerEvents(height int64, events []abci.Event) error {
 		asset := types.NewStakerAssetFromStr(
 			stakerID.Value, assetID.Value,
 			depositAmount.Value, withdrawableAmount.Value, pendingUndelegationAmount.Value,
-			"", // no update to slashed amount
 		)
 		if err := m.db.SaveStakerAsset(asset); err != nil {
 			return fmt.Errorf("error while saving staker asset: %s", err)

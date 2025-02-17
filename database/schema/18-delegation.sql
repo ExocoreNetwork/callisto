@@ -15,7 +15,7 @@ CREATE TABLE exo_asset_delegation (
     -- but that will be emitted as a slashing event too
     pending_undelegation NUMERIC NOT NULL DEFAULT 0,
     -- cumulative, derived from the slashing events
-    slashed NUMERIC NOT NULL DEFAULT 0,
+    lifetime_slashed NUMERIC NOT NULL DEFAULT 0,
     -- no constraints on the amount because no deposits or withdrawals permitted
     PRIMARY KEY (staker_id, operator_addr),
     CONSTRAINT fk_operator FOREIGN KEY (operator_addr) REFERENCES operators (earnings_addr)
@@ -63,7 +63,6 @@ CREATE INDEX idx_operator_asset_stakers_asset ON operator_asset_stakers (asset_i
 CREATE INDEX idx_operator_asset_stakers_operator_asset ON operator_asset_stakers (operator_addr, asset_id);
 CREATE INDEX idx_operator_asset_stakers_staker ON operator_asset_stakers (staker_id);
 
--- track the undelegation records
 CREATE TABLE undelegation_records (
     record_id TEXT PRIMARY KEY,
     staker_id TEXT NOT NULL,

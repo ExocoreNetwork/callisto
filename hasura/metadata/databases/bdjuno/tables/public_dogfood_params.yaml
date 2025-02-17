@@ -1,0 +1,17 @@
+table:
+  name: dogfood_params
+  schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - height
+    - epochs_until_unbonded
+    - epoch_identifier
+    - max_validators
+    - historical_entries
+    - min_self_delegation
+    - asset_ids
+    filter: {}
+    limit: 1
+  role: anonymous

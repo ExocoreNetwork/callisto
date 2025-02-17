@@ -1,0 +1,17 @@
+table:
+  name: client_chain_earning_addresses
+  schema: public
+object_relationships:
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - operator_addr
+    - lz_client_chain_id
+    - client_chain_earning_addr
+    filter: {}
+    limit: 5
+  role: anonymous

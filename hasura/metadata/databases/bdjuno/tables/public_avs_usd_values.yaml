@@ -1,0 +1,16 @@
+table:
+  name: avs_usd_values
+  schema: public
+object_relationships:
+- name: av
+  using:
+    foreign_key_constraint_on: avs_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - avs_addr
+    - usd_value
+    filter: {}
+    limit: 10
+  role: anonymous

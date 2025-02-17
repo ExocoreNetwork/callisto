@@ -1,0 +1,20 @@
+table:
+  name: operator_asset_stakers
+  schema: public
+object_relationships:
+- name: assets_token
+  using:
+    foreign_key_constraint_on: asset_id
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - operator_addr
+    - asset_id
+    - staker_id
+    filter: {}
+    limit: 100
+  role: anonymous

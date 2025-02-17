@@ -1,0 +1,59 @@
+table:
+  name: assets_tokens
+  schema: public
+object_relationships:
+- name: client_chain
+  using:
+    foreign_key_constraint_on: layer_zero_chain_id
+array_relationships:
+- name: delegation_states
+  using:
+    foreign_key_constraint_on:
+      column: asset_id
+      table:
+        name: delegation_states
+        schema: public
+- name: operator_asset_stakers
+  using:
+    foreign_key_constraint_on:
+      column: asset_id
+      table:
+        name: operator_asset_stakers
+        schema: public
+- name: operator_assets
+  using:
+    foreign_key_constraint_on:
+      column: asset_id
+      table:
+        name: operator_assets
+        schema: public
+- name: staker_assets
+  using:
+    foreign_key_constraint_on:
+      column: asset_id
+      table:
+        name: staker_assets
+        schema: public
+- name: undelegation_records
+  using:
+    foreign_key_constraint_on:
+      column: asset_id
+      table:
+        name: undelegation_records
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - asset_id
+    - name
+    - symbol
+    - address
+    - decimals
+    - layer_zero_chain_id
+    - exocore_chain_index
+    - meta_info
+    - staking_total_amount
+    filter: {}
+    limit: 5
+  role: anonymous

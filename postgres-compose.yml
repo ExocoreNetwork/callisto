@@ -58,3 +58,54 @@ services:
       # will only do something if RESET_DB is true
       RESET_DB: "${RESET_DB:-false}"
     entrypoint: ["/bin/bash", "/schema/setup-entrypoint.sh"]
+
+  hasura:
+    image: hasura/graphql-engine:v2.0.4
+    container_name: bdjuno-hasura
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${BDJUNO_USER:-bdjuno}:${BDJUNO_PASSWORD:-changeme}@db:5432/bdjuno
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://${BDJUNO_USER:-bdjuno}:${BDJUNO_PASSWORD:-changeme}@db:5432/bdjuno
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_MIGRATIONS_DIR: /hasura-migrations
+      HASURA_GRAPHQL_METADATA_DIR: /hasura-metadata
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
+      HASURA_GRAPHQL_ADMIN_SECRET: "secret"
+    volumes:
+      - ./hasura/migrations:/hasura-migrations
+      - ./hasura/metadata:/hasura-metadata
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+
+  hasura-cli:
+    image: ubuntu:22.04
+    container_name: bdjuno-hasura-cli
+    volumes:
+      - ./hasura:/hasura
+    environment:
+      HASURA_GRAPHQL_ENDPOINT: http://hasura:8080
+      RESET_METADATA: "${RESET_METADATA:-false}"
+    depends_on:
+      - hasura
+    command: >
+      sh -c "
+      apt-get update && apt-get install -y curl;
+      curl -L https://github.com/hasura/graphql-engine/releases/download/v2.0.4/cli-hasura-linux-amd64 -o /usr/local/bin/hasura &&
+      chmod +x /usr/local/bin/hasura;
+      mkdir -p /root/.hasura/cli-ext/v2.0.4/;
+      curl -L -o /root/.hasura/cli-ext/v2.0.4/cli-ext https://github.com/hasura/graphql-engine/releases/download/v2.0.4/cli-ext-linux-amd64 &&
+      chmod +x /root/.hasura/cli-ext/v2.0.4/cli-ext;
+      if [ \"${RESET_METADATA}\" = \"true\" ]; then
+        echo 'Clearing old metadata...';
+        rm -rf /hasura/metadata/*;
+        cd /hasura;
+        hasura metadata clear;
+        hasura metadata apply;
+        hasura metadata reload;
+        hasura metadata export;
+      fi"

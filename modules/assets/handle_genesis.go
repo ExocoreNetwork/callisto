@@ -63,14 +63,6 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 			err = m.db.SaveStakerAsset(
 				types.NewStakerAssetFromInfo(
 					stakerID, assetID, deposit,
-					// additional slashed amount
-					// TODO: check for initial lifetime slashed somehow?
-					// it is possible to calculate it by finding the total delegation across all operators
-					// and then subtracting that from this genesis state. however, we are again, not meant
-					// to house any business logic here.
-					// at genesis, this "" will lead to lifetime_slashed being skipped at insertion
-					// so it will default to 0.
-					"",
 				),
 			)
 			if err != nil {

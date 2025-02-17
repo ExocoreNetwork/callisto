@@ -1,0 +1,97 @@
+table:
+  name: operators
+  schema: public
+object_relationships:
+- name: opt_out_expiry
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: opt_out_expiries
+        schema: public
+array_relationships:
+- name: client_chain_earning_addresses
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: client_chain_earning_addresses
+        schema: public
+- name: consensus_keys
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: consensus_keys
+        schema: public
+- name: delegation_states
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: delegation_states
+        schema: public
+- name: exo_asset_delegations
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: exo_asset_delegation
+        schema: public
+- name: operator_asset_stakers
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: operator_asset_stakers
+        schema: public
+- name: operator_assets
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: operator_assets
+        schema: public
+- name: operator_avs_opt_ins
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: operator_avs_opt_ins
+        schema: public
+- name: operator_usd_values
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: operator_usd_values
+        schema: public
+- name: staker_operator_associations
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: staker_operator_association
+        schema: public
+- name: undelegation_records
+  using:
+    foreign_key_constraint_on:
+      column: operator_addr
+      table:
+        name: undelegation_records
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - operator_addr
+    - earnings_addr
+    - approve_addr
+    - operator_meta_info
+    - commission_rate
+    - max_commission_rate
+    - max_change_rate
+    - commission_last_updated
+    filter: {}
+    limit: 50
+  role: anonymous

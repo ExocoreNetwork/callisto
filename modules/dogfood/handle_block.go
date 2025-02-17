@@ -1,16 +1,19 @@
 package dogfood
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog/log"
 
 	dogfoodtypes "github.com/ExocoreNetwork/exocore/x/dogfood/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmctypes "github.com/cometbft/cometbft/rpc/core/types"
 	juno "github.com/forbole/juno/v5/types"
 
-	callistotypes "github.com/forbole/callisto/v4/types"
+	tmtypes "github.com/cometbft/cometbft/types"
+	"github.com/forbole/callisto/v4/types"
 )
 
 // HandleBlock implements BlockModule
@@ -38,6 +41,11 @@ func (m *Module) HandleBlock(
 	if err := m.handleUndelegationsMatured(block.Block.Height, res.BeginBlockEvents); err != nil {
 		return fmt.Errorf("error while handling dogfood undelegation matured: %s", err)
 	}
+
+	// heavy operation, so we run it in a goroutine. it can also not return an error.
+	// so it is just logged.
+	go m.updateDoubleSignEvidence(block.Block.Height, block.Block.Evidence.Evidence)
+
 	return nil
 }
 
@@ -64,9 +72,9 @@ func (m *Module) handleValidatorSetChange(height int64, events []abci.Event) err
 	}
 	// remember that, this function is called after worker.SaveValidators, so we do not
 	// need to save the validators - we can instead focus on the vote power.
-	votingPowers := make([]callistotypes.ValidatorVotingPower, len(validators))
+	votingPowers := make([]types.ValidatorVotingPower, len(validators))
 	for i, validator := range validators {
-		votingPowers[i] = callistotypes.NewValidatorVotingPower(
+		votingPowers[i] = types.NewValidatorVotingPower(
 			sdk.ConsAddress(validator.Address).String(),
 			validator.Power, height,
 		)
@@ -122,4 +130,51 @@ func (m *Module) handleUndelegationsMatured(height int64, events []abci.Event) e
 		}
 	}
 	return nil
+}
+
+// updateDoubleSignEvidence updates the double sign evidence of all validators
+// this function is copied verbatim from the x/staking module.
+func (m *Module) updateDoubleSignEvidence(height int64, evidenceList tmtypes.EvidenceList) {
+	log.Debug().Str("module", m.Name()).Int64("height", height).
+		Msg("updating double sign evidence")
+
+	var evidences []types.DoubleSignEvidence
+	for _, ev := range evidenceList {
+		dve, ok := ev.(*tmtypes.DuplicateVoteEvidence)
+		if !ok {
+			continue
+		}
+
+		evidences = append(evidences, types.NewDoubleSignEvidence(
+			height,
+			types.NewDoubleSignVote(
+				int(dve.VoteA.Type),
+				dve.VoteA.Height,
+				dve.VoteA.Round,
+				dve.VoteA.BlockID.String(),
+				juno.ConvertValidatorAddressToBech32String(dve.VoteA.ValidatorAddress),
+				dve.VoteA.ValidatorIndex,
+				hex.EncodeToString(dve.VoteA.Signature),
+			),
+			types.NewDoubleSignVote(
+				int(dve.VoteB.Type),
+				dve.VoteB.Height,
+				dve.VoteB.Round,
+				dve.VoteB.BlockID.String(),
+				juno.ConvertValidatorAddressToBech32String(dve.VoteB.ValidatorAddress),
+				dve.VoteB.ValidatorIndex,
+				hex.EncodeToString(dve.VoteB.Signature),
+			),
+		),
+		)
+	}
+
+	// handles both the double sign votes and the double sign evidences
+	err := m.db.SaveDoubleSignEvidences(evidences)
+	if err != nil {
+		log.Error().Str("module", m.Name()).Err(err).Int64("height", height).
+			Msg("error while saving double sign evidence")
+		return
+	}
+
 }

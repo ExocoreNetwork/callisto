@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/forbole/callisto/v4/types"
 )
 
@@ -136,45 +138,57 @@ WHERE asset_id = $2;`
 // SaveStakerAsset saves a staker asset record in the database, including
 // an entry in the history table.
 func (db *Db) SaveStakerAsset(data *types.StakerAsset) error {
-	var stmt string
-	var args []interface{}
-
-	if data.AdditionalSlashed != "" {
-		// Add the new slashed amount to the existing one in the DB
-		stmt = `
-INSERT INTO staker_assets (staker_id, asset_id, deposited, withdrawable, pending_undelegation, lifetime_slashed)
-VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (staker_id, asset_id) DO UPDATE
-SET deposited = EXCLUDED.deposited,
-	withdrawable = EXCLUDED.withdrawable,
-	pending_undelegation = EXCLUDED.pending_undelegation,
-	lifetime_slashed = staker_assets.lifetime_slashed + EXCLUDED.lifetime_slashed,
-	delegated = EXCLUDED.deposited - EXCLUDED.withdrawable - EXCLUDED.pending_undelegation - (staker_assets.lifetime_slashed + EXCLUDED.lifetime_slashed);`
-		args = []interface{}{
-			data.StakerID, data.AssetID,
-			data.Deposited, data.Withdrawable,
-			data.PendingUndelegation, data.AdditionalSlashed,
-		}
-	} else {
-		// No slashing update, just recalculate delegated
-		stmt = `
+	stmt := `
 INSERT INTO staker_assets (staker_id, asset_id, deposited, withdrawable, pending_undelegation)
 VALUES ($1, $2, $3, $4, $5)
 ON CONFLICT (staker_id, asset_id) DO UPDATE
 SET deposited = EXCLUDED.deposited,
 	withdrawable = EXCLUDED.withdrawable,
 	pending_undelegation = EXCLUDED.pending_undelegation,
-	delegated = EXCLUDED.deposited - EXCLUDED.withdrawable - EXCLUDED.pending_undelegation - staker_assets.lifetime_slashed;`
-		args = []interface{}{
-			data.StakerID, data.AssetID,
-			data.Deposited, data.Withdrawable,
-			data.PendingUndelegation,
-		}
-	}
+	delegated = EXCLUDED.deposited - EXCLUDED.withdrawable - EXCLUDED.pending_undelegation - staker_assets.lifetime_slashed,
+	lifetime_slashed = staker_assets.lifetime_slashed;`
 
-	_, err := db.SQL.Exec(stmt, args...)
+	_, err := db.SQL.Exec(
+		stmt,
+		data.StakerID,
+		data.AssetID,
+		data.Deposited,
+		data.Withdrawable,
+		data.PendingUndelegation,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to save staker asset: %w", err)
+	}
+	return nil
+}
+
+// GetDelegatedAmount returns the delegated amount for a given staker and asset.
+func (db *Db) GetDelegatedAmount(stakerID, assetID string) (sdkmath.Int, error) {
+	stmt := `
+	SELECT delegated FROM staker_assets WHERE staker_id = $1 AND asset_id = $2;`
+	var delegatedAmount string
+	err := db.SQL.QueryRow(stmt, stakerID, assetID).Scan(&delegatedAmount)
+	if err != nil {
+		return sdkmath.Int{}, fmt.Errorf("failed to get delegated amount: %w", err)
+	}
+	delegatedAmountInt, ok := sdkmath.NewIntFromString(delegatedAmount)
+	if !ok {
+		return sdkmath.Int{}, fmt.Errorf("failed to convert delegated amount to int: %s", delegatedAmount)
+	}
+	return delegatedAmountInt, nil
+}
+
+// SlashStakerDelegation slashes the staker delegation. It updates the lifetime slashed amount
+// and the delegated amount.
+func (db *Db) SlashStakerDelegation(stakerID, assetID, slashedAmount string) error {
+	stmt := `
+	UPDATE staker_assets
+	SET lifetime_slashed = lifetime_slashed + $1,
+	    delegated = delegated - $1
+	WHERE staker_id = $2 AND asset_id = $3;`
+	_, err := db.SQL.Exec(stmt, slashedAmount, stakerID, assetID)
+	if err != nil {
+		return fmt.Errorf("failed to accumulate staker lifetime slashing: %w", err)
 	}
 	return nil
 }

@@ -40,17 +40,17 @@ func (s Source) GetDelegatedAmount(
 		return sdkmath.ZeroInt(), fmt.Errorf("error while loading height: %s", err)
 	}
 
-	res, err := s.querier.QueryDelegatedAmount(
+	res, err := s.querier.QuerySingleDelegationInfo(
 		sdk.WrapSDKContext(ctx),
-		&delegationtypes.QueryDelegatedAmountRequest{
-			StakerId: stakerID,
-			AssetId:  assetID,
-			Operator: operatorAddr,
+		&delegationtypes.SingleDelegationInfoReq{
+			StakerId:     stakerID,
+			AssetId:      assetID,
+			OperatorAddr: operatorAddr,
 		},
 	)
 	if err != nil {
 		return sdkmath.ZeroInt(), err
 	}
 
-	return res.Amount, nil
+	return res.MaxUndelegatableAmount, nil
 }

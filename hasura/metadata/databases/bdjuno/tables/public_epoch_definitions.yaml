@@ -1,0 +1,21 @@
+table:
+  name: epoch_definitions
+  schema: public
+object_relationships:
+- name: epoch_state
+  using:
+    foreign_key_constraint_on:
+      column: identifier
+      table:
+        name: epoch_states
+        schema: public
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - identifier
+    - start_time
+    - duration
+    filter: {}
+    limit: 5
+  role: anonymous

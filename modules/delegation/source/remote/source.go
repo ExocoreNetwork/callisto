@@ -34,17 +34,17 @@ func (s Source) GetDelegatedAmount(
 ) (sdkmath.Int, error) {
 	ctx := remote.GetHeightRequestContext(s.Ctx, height)
 
-	res, err := s.querier.QueryDelegatedAmount(
+	res, err := s.querier.QuerySingleDelegationInfo(
 		ctx,
-		&delegationtypes.QueryDelegatedAmountRequest{
-			StakerId: stakerID,
-			AssetId:  assetID,
-			Operator: operatorAddr,
+		&delegationtypes.SingleDelegationInfoReq{
+			StakerId:     stakerID,
+			AssetId:      assetID,
+			OperatorAddr: operatorAddr,
 		},
 	)
 	if err != nil {
 		return sdkmath.ZeroInt(), err
 	}
 
-	return res.Amount, nil
+	return res.MaxUndelegatableAmount, nil
 }

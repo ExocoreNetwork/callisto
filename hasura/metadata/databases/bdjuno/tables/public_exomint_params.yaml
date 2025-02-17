@@ -1,15 +1,12 @@
 table:
-  name: staking_pool
+  name: exomint_params
   schema: public
 select_permissions:
 - permission:
     allow_aggregations: false
     columns:
+    - params
     - height
-    - bonded_tokens
-    - not_bonded_tokens
-    - unbonding_tokens
-    - staked_not_bonded_tokens
     filter: {}
     limit: 1
   role: anonymous

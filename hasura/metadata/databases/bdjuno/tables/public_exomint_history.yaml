@@ -1,0 +1,19 @@
+table:
+  name: exomint_history
+  schema: public
+object_relationships:
+- name: epoch_state
+  using:
+    foreign_key_constraint_on: epoch_id
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - block_height
+    - quantity_minted
+    - epoch_id
+    - epoch_number
+    - denom
+    filter: {}
+    limit: 10
+  role: anonymous

@@ -1,0 +1,17 @@
+table:
+  name: undelegation_maturities
+  schema: public
+object_relationships:
+- name: undelegation_record
+  using:
+    foreign_key_constraint_on: undelegation_record_id
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - epoch_number
+    - undelegation_record_id
+    - completion_height
+    filter: {}
+    limit: 10
+  role: anonymous

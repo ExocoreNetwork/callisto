@@ -114,19 +114,17 @@ type ExoAssetDelegation struct {
 	OperatorAddr        string
 	Delegated           string
 	PendingUndelegation string
-	Slashed             string
 }
 
 // NewExoAssetDelegationFromStr creates a new ExoAssetDelegation instance using the given values in
 // string format.
 func NewExoAssetDelegationFromStr(
-	stakerID, operatorAddr, delegated, pendingUndelegation, slashed string,
+	stakerID, operatorAddr, delegated, pendingUndelegation string,
 ) *ExoAssetDelegation {
 	return &ExoAssetDelegation{
 		StakerID:            stakerID,
 		OperatorAddr:        operatorAddr,
 		Delegated:           delegated,
 		PendingUndelegation: pendingUndelegation,
-		Slashed:             slashed,
 	}
 }

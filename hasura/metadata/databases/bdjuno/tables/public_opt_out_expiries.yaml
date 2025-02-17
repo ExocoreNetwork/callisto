@@ -1,0 +1,17 @@
+table:
+  name: opt_out_expiries
+  schema: public
+object_relationships:
+- name: operator
+  using:
+    foreign_key_constraint_on: operator_addr
+select_permissions:
+- permission:
+    allow_aggregations: false
+    columns:
+    - operator_addr
+    - epoch_number
+    - completion_height
+    filter: {}
+    limit: 10
+  role: anonymous
