@@ -3,8 +3,9 @@ package remote
 import (
 	dogfoodtypes "github.com/ExocoreNetwork/exocore/x/dogfood/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	dogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source"
 	"github.com/forbole/juno/v5/node/remote"
+
+	dogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source"
 )
 
 // interface guard

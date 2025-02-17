@@ -6,8 +6,9 @@ import (
 	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
 	delegationtypes "github.com/ExocoreNetwork/exocore/x/delegation/types"
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/forbole/callisto/v4/types"
 	juno "github.com/forbole/juno/v5/types"
+
+	"github.com/forbole/callisto/v4/types"
 )
 
 // HandleTx implements modules.TransactionModule

@@ -2,10 +2,12 @@ package exomint
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/forbole/callisto/v4/database"
 
-	exomintsource "github.com/forbole/callisto/v4/modules/exomint/source"
 	"github.com/forbole/juno/v5/modules"
+
+	exomintsource "github.com/forbole/callisto/v4/modules/exomint/source"
 )
 
 var (

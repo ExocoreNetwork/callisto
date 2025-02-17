@@ -28,10 +28,11 @@ import (
 	"github.com/forbole/callisto/v4/modules/consensus"
 	"github.com/forbole/callisto/v4/modules/feegrant"
 
+	juno "github.com/forbole/juno/v5/types"
+
 	dailyrefetch "github.com/forbole/callisto/v4/modules/daily_refetch"
 	messagetype "github.com/forbole/callisto/v4/modules/message_type"
 	"github.com/forbole/callisto/v4/modules/modules"
-	juno "github.com/forbole/juno/v5/types"
 )
 
 // UniqueAddressesParser returns a wrapper around the given parser that removes all duplicated addresses

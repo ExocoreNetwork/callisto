@@ -6,8 +6,9 @@ import (
 	operatortypes "github.com/ExocoreNetwork/exocore/x/operator/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/forbole/callisto/v4/types"
 	juno "github.com/forbole/juno/v5/types"
+
+	"github.com/forbole/callisto/v4/types"
 )
 
 // HandleTx implements modules.TransactionModule

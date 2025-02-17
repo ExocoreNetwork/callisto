@@ -2,10 +2,12 @@ package dogfood
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/forbole/callisto/v4/database"
 
-	dogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source"
 	"github.com/forbole/juno/v5/modules"
+
+	dogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source"
 )
 
 var (

@@ -2,10 +2,12 @@ package epochs
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/forbole/callisto/v4/database"
 
-	epochssource "github.com/forbole/callisto/v4/modules/epochs/source"
 	"github.com/forbole/juno/v5/modules"
+
+	epochssource "github.com/forbole/callisto/v4/modules/epochs/source"
 )
 
 var (

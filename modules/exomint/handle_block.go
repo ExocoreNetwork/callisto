@@ -8,9 +8,10 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/forbole/callisto/v4/types"
 	juno "github.com/forbole/juno/v5/types"
 	"github.com/rs/zerolog/log"
+
+	"github.com/forbole/callisto/v4/types"
 )
 
 // HandleBlock implements BlockModule

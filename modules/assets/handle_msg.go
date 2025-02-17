@@ -7,8 +7,9 @@ import (
 
 	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/forbole/callisto/v4/types"
 	juno "github.com/forbole/juno/v5/types"
+
+	"github.com/forbole/callisto/v4/types"
 )
 
 // HandleMsgExec implements AuthzMessageModule. It handles the case wherein

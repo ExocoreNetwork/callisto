@@ -16,6 +16,7 @@ import (
 	"cosmossdk.io/simapp"
 
 	exocoreapp "github.com/ExocoreNetwork/exocore/app"
+
 	"github.com/forbole/callisto/v4/database"
 	"github.com/forbole/callisto/v4/modules"
 )

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	tmtypes "github.com/cometbft/cometbft/types"
+
 	"github.com/forbole/callisto/v4/types"
 
 	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"

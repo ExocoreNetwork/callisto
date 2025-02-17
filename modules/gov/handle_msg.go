@@ -5,8 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/forbole/callisto/v4/types"
 	"google.golang.org/grpc/codes"
+
+	"github.com/forbole/callisto/v4/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"

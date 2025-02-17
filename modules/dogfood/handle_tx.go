@@ -5,8 +5,9 @@ import (
 
 	dogfoodtypes "github.com/ExocoreNetwork/exocore/x/dogfood/types"
 	abci "github.com/cometbft/cometbft/abci/types"
-	callistotypes "github.com/forbole/callisto/v4/types"
 	juno "github.com/forbole/juno/v5/types"
+
+	callistotypes "github.com/forbole/callisto/v4/types"
 )
 
 // HandleTx implements modules.TransactionModule

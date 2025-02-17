@@ -2,10 +2,12 @@ package assets
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/forbole/callisto/v4/database"
 
-	assetssource "github.com/forbole/callisto/v4/modules/assets/source"
 	"github.com/forbole/juno/v5/modules"
+
+	assetssource "github.com/forbole/callisto/v4/modules/assets/source"
 )
 
 var (

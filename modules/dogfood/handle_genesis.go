@@ -9,9 +9,10 @@ import (
 
 	keytypes "github.com/ExocoreNetwork/exocore/types/keys"
 	dogfoodtypes "github.com/ExocoreNetwork/exocore/x/dogfood/types"
-	callistotypes "github.com/forbole/callisto/v4/types"
 	junotypes "github.com/forbole/juno/v5/types"
 	"github.com/rs/zerolog/log"
+
+	callistotypes "github.com/forbole/callisto/v4/types"
 )
 
 // HandleGenesis implements modules.GenesisModule

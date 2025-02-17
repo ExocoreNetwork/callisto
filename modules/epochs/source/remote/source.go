@@ -5,6 +5,7 @@ import (
 	"github.com/forbole/juno/v5/node/remote"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
+
 	epochssource "github.com/forbole/callisto/v4/modules/epochs/source"
 )
 

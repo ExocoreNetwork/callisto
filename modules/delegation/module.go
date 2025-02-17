@@ -2,10 +2,12 @@ package delegation
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/forbole/callisto/v4/database"
 
-	delegationsource "github.com/forbole/callisto/v4/modules/delegation/source"
 	"github.com/forbole/juno/v5/modules"
+
+	delegationsource "github.com/forbole/callisto/v4/modules/delegation/source"
 )
 
 var (

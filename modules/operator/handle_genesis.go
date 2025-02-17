@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	tmtypes "github.com/cometbft/cometbft/types"
+
 	"github.com/forbole/callisto/v4/types"
 
 	keytypes "github.com/ExocoreNetwork/exocore/types/keys"
