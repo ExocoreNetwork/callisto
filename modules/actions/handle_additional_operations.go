@@ -24,22 +24,7 @@ func (m *Module) RunAdditionalOperations() error {
 	// -- Bank --
 	worker.RegisterHandler("/account_balance", handlers.AccountBalanceHandler)
 
-	// -- Distribution --
-	worker.RegisterHandler("/delegation_reward", handlers.DelegationRewardHandler)
-	worker.RegisterHandler("/delegator_withdraw_address", handlers.DelegatorWithdrawAddressHandler)
-	worker.RegisterHandler("/validator_commission_amount", handlers.ValidatorCommissionAmountHandler)
-
-	// -- Staking Delegator --
-	worker.RegisterHandler("/delegation", handlers.DelegationHandler)
-	worker.RegisterHandler("/delegation_total", handlers.TotalDelegationAmountHandler)
-	worker.RegisterHandler("/unbonding_delegation", handlers.UnbondingDelegationsHandler)
-	worker.RegisterHandler("/unbonding_delegation_total", handlers.UnbondingDelegationsTotal)
-	worker.RegisterHandler("/redelegation", handlers.RedelegationHandler)
-
-	// -- Staking Validator --
-	worker.RegisterHandler("/validator_delegations", handlers.ValidatorDelegation)
-	worker.RegisterHandler("/validator_redelegations_from", handlers.ValidatorRedelegationsFromHandler)
-	worker.RegisterHandler("/validator_unbonding_delegations", handlers.ValidatorUnbondingDelegationsHandler)
+	// TODO: add more handlers here
 
 	// Listen for and trap any OS signal to gracefully shutdown and exit
 	m.trapSignal()

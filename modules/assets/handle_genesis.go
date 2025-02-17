@@ -40,7 +40,7 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 
 	// Save the genesis client chains
 	for _, chain := range genState.ClientChains {
-		err = m.db.SaveOrUpdateClientChain(chain)
+		err = m.db.SaveOrUpdateClientChain(types.NewClientChain(chain))
 		if err != nil {
 			return fmt.Errorf("error while storing genesis client chain: %s", err)
 		}
@@ -48,7 +48,7 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 
 	// Save the genesis tokens
 	for _, token := range genState.Tokens {
-		err = m.db.SaveToken(token)
+		err = m.db.SaveAssetsToken(types.NewAssetsToken(&token))
 		if err != nil {
 			return fmt.Errorf("error while storing genesis token: %s", err)
 		}
@@ -62,7 +62,15 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 			deposit := layerTwo.Info
 			err = m.db.SaveStakerAsset(
 				types.NewStakerAssetFromInfo(
-					stakerID, assetID, deposit, doc.InitialHeight,
+					stakerID, assetID, deposit,
+					// additional slashed amount
+					// TODO: check for initial lifetime slashed somehow?
+					// it is possible to calculate it by finding the total delegation across all operators
+					// and then subtracting that from this genesis state. however, we are again, not meant
+					// to house any business logic here.
+					// at genesis, this "" will lead to lifetime_slashed being skipped at insertion
+					// so it will default to 0.
+					"",
 				),
 			)
 			if err != nil {
@@ -79,7 +87,7 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 			state := layerTwo.Info
 			err = m.db.SaveOperatorAsset(
 				types.NewOperatorAssetFromInfo(
-					operatorAddress, assetID, state, doc.InitialHeight,
+					operatorAddress, assetID, state,
 				),
 			)
 			if err != nil {

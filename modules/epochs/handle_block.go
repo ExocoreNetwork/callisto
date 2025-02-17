@@ -17,6 +17,8 @@ func (m *Module) HandleBlock(
 	if err := m.saveEpochStates(block.Block.Height, res.BeginBlockEvents); err != nil {
 		return fmt.Errorf("error while saving epoch states: %s", err)
 	}
+	// we do not track epoch end events.
+	// no known end blocker events for x/epochs
 	return nil
 }
 
@@ -24,8 +26,10 @@ func (m *Module) HandleBlock(
 func (m *Module) saveEpochStates(height int64, events []abci.Event) error {
 	log.Debug().Str("module", m.Name()).Int64("height", height).
 		Msg("updating epoch states")
-	// if an epoch end event is found, save the epoch state.
-	events = juno.FindEventsByType(events, epochstypes.EventTypeEpochEnd)
+	// if an epoch start event is found, save the epoch state.
+	// this is preferred over epoch end, since, before this event, the state is
+	// updated to be correct.
+	events = juno.FindEventsByType(events, epochstypes.EventTypeEpochStart)
 	for _, event := range events {
 		epochID, err := juno.FindAttributeByKey(event, epochstypes.AttributeEpochIdentifier)
 		if err != nil {

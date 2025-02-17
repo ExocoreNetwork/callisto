@@ -9,6 +9,10 @@ import (
 	"github.com/forbole/juno/v5/node/remote"
 	"github.com/forbole/juno/v5/types/params"
 
+	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
+	delegationtypes "github.com/ExocoreNetwork/exocore/x/delegation/types"
+	dogfoodkeeper "github.com/ExocoreNetwork/exocore/x/dogfood/keeper"
+	dogfoodtypes "github.com/ExocoreNetwork/exocore/x/dogfood/types"
 	epochstypes "github.com/ExocoreNetwork/exocore/x/epochs/types"
 	exominttypes "github.com/ExocoreNetwork/exocore/x/exomint/types"
 
@@ -34,6 +38,18 @@ import (
 	localexomintsource "github.com/forbole/callisto/v4/modules/exomint/source/local"
 	remoteexomintsource "github.com/forbole/callisto/v4/modules/exomint/source/remote"
 
+	assetssource "github.com/forbole/callisto/v4/modules/assets/source"
+	localassetssource "github.com/forbole/callisto/v4/modules/assets/source/local"
+	remoteassetssource "github.com/forbole/callisto/v4/modules/assets/source/remote"
+
+	delegationsource "github.com/forbole/callisto/v4/modules/delegation/source"
+	localdelegationsource "github.com/forbole/callisto/v4/modules/delegation/source/local"
+	remotedelegationsource "github.com/forbole/callisto/v4/modules/delegation/source/remote"
+
+	dogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source"
+	localdogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source/local"
+	remotedogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source/remote"
+
 	exocoreapp "github.com/ExocoreNetwork/exocore/app"
 )
 
@@ -44,8 +60,11 @@ type Sources struct {
 	// MintSource     mintsource.Source
 	SlashingSource slashingsource.Source
 	// StakingSource  stakingsource.Source
-	EpochsSource  epochssource.Source
-	ExomintSource exomintsource.Source
+	EpochsSource     epochssource.Source
+	ExomintSource    exomintsource.Source
+	AssetsSource     assetssource.Source
+	DelegationSource delegationsource.Source
+	DogfoodSource    dogfoodsource.Source
 }
 
 func BuildSources(nodeCfg nodeconfig.Config, encodingConfig params.EncodingConfig) (*Sources, error) {
@@ -80,6 +99,9 @@ func buildLocalSources(cfg *local.Details, encodingConfig params.EncodingConfig)
 		EpochsSource:   localepochssource.NewSource(source, epochstypes.QueryServer(app.EpochsKeeper)),
 		ExomintSource:  localexomintsource.NewSource(source, exominttypes.QueryServer(app.ExomintKeeper)),
 		// StakingSource:  localstakingsource.NewSource(source, stakingkeeper.Querier{Keeper: app.StakingKeeper}),
+		AssetsSource:     localassetssource.NewSource(source, assetstypes.QueryServer(app.AssetsKeeper)),
+		DelegationSource: localdelegationsource.NewSource(source, delegationtypes.QueryServer(&app.DelegationKeeper)),
+		DogfoodSource:    localdogfoodsource.NewSource(source, dogfoodkeeper.NewQueryServer(app.StakingKeeper)),
 	}
 
 	// Mount and initialize the stores
@@ -119,7 +141,10 @@ func buildRemoteSources(cfg *remote.Details) (*Sources, error) {
 		// MintSource:     remotemintsource.NewSource(source, minttypes.NewQueryClient(source.GrpcConn)),
 		SlashingSource: remoteslashingsource.NewSource(source, slashingtypes.NewQueryClient(source.GrpcConn)),
 		// StakingSource:  remotestakingsource.NewSource(source, stakingtypes.NewQueryClient(source.GrpcConn)),
-		EpochsSource:  remoteepochssource.NewSource(source, epochstypes.NewQueryClient(source.GrpcConn)),
-		ExomintSource: remoteexomintsource.NewSource(source, exominttypes.NewQueryClient(source.GrpcConn)),
+		EpochsSource:     remoteepochssource.NewSource(source, epochstypes.NewQueryClient(source.GrpcConn)),
+		ExomintSource:    remoteexomintsource.NewSource(source, exominttypes.NewQueryClient(source.GrpcConn)),
+		AssetsSource:     remoteassetssource.NewSource(source, assetstypes.NewQueryClient(source.GrpcConn)),
+		DelegationSource: remotedelegationsource.NewSource(source, delegationtypes.NewQueryClient(source.GrpcConn)),
+		DogfoodSource:    remotedogfoodsource.NewSource(source, dogfoodtypes.NewQueryClient(source.GrpcConn)),
 	}, nil
 }

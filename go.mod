@@ -393,4 +393,5 @@ replace (
 	github.com/evmos/evmos/v16 => github.com/ExocoreNetwork/evmos/v16 v16.0.3-0.20240828081344-d5cfcd34a812
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230515195305-f3d0a9c9a5cc
+	github.com/ExocoreNetwork/exocore => /home/user/go/src/github.com/ExocoreNetwork/exocore
 )

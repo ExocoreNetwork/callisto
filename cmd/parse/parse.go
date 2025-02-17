@@ -12,12 +12,8 @@ import (
 
 	parseauth "github.com/forbole/callisto/v4/cmd/parse/auth"
 	parsebank "github.com/forbole/callisto/v4/cmd/parse/bank"
-	parsedistribution "github.com/forbole/callisto/v4/cmd/parse/distribution"
 	parsefeegrant "github.com/forbole/callisto/v4/cmd/parse/feegrant"
-	parsegov "github.com/forbole/callisto/v4/cmd/parse/gov"
-	parsemint "github.com/forbole/callisto/v4/cmd/parse/mint"
 	parsepricefeed "github.com/forbole/callisto/v4/cmd/parse/pricefeed"
-	parsestaking "github.com/forbole/callisto/v4/cmd/parse/staking"
 )
 
 // NewParseCmd returns the Cobra command allowing to parse some chain data without having to re-sync the whole database
@@ -32,13 +28,9 @@ func NewParseCmd(parseCfg *parse.Config) *cobra.Command {
 		parseauth.NewAuthCmd(parseCfg),
 		parsebank.NewBankCmd(parseCfg),
 		parseblocks.NewBlocksCmd(parseCfg),
-		parsedistribution.NewDistributionCmd(parseCfg),
 		parsefeegrant.NewFeegrantCmd(parseCfg),
 		parsegenesis.NewGenesisCmd(parseCfg),
-		parsegov.NewGovCmd(parseCfg),
-		parsemint.NewMintCmd(parseCfg),
 		parsepricefeed.NewPricefeedCmd(parseCfg),
-		parsestaking.NewStakingCmd(parseCfg),
 		parsetransaction.NewTransactionsCmd(parseCfg),
 	)
 

@@ -1,10 +1,10 @@
-package assets
+package dogfood
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/forbole/callisto/v4/database"
 
-	assetssource "github.com/forbole/callisto/v4/modules/assets/source"
+	dogfoodsource "github.com/forbole/callisto/v4/modules/dogfood/source"
 	"github.com/forbole/juno/v5/modules"
 )
 
@@ -20,11 +20,11 @@ var (
 type Module struct {
 	cdc    codec.Codec
 	db     *database.Db
-	source assetssource.Source
+	source dogfoodsource.Source
 }
 
 // NeawModule builds a new Module instance
-func NewModule(source assetssource.Source, cdc codec.Codec, db *database.Db) *Module {
+func NewModule(source dogfoodsource.Source, cdc codec.Codec, db *database.Db) *Module {
 	return &Module{
 		cdc:    cdc,
 		db:     db,
@@ -34,5 +34,5 @@ func NewModule(source assetssource.Source, cdc codec.Codec, db *database.Db) *Mo
 
 // Name implements modules.Module
 func (m *Module) Name() string {
-	return "assets"
+	return "dogfood"
 }

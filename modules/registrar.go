@@ -2,8 +2,13 @@ package modules
 
 import (
 	"github.com/forbole/callisto/v4/modules/actions"
+	"github.com/forbole/callisto/v4/modules/assets"
+	"github.com/forbole/callisto/v4/modules/avs"
+	"github.com/forbole/callisto/v4/modules/delegation"
+	"github.com/forbole/callisto/v4/modules/dogfood"
 	"github.com/forbole/callisto/v4/modules/epochs"
 	"github.com/forbole/callisto/v4/modules/exomint"
+	"github.com/forbole/callisto/v4/modules/operator"
 	"github.com/forbole/callisto/v4/modules/types"
 
 	"github.com/forbole/juno/v5/modules/pruning"
@@ -71,8 +76,8 @@ func (r *Registrar) BuildModules(ctx registrar.Context) jmodules.Modules {
 	}
 
 	// starts a server for many operations with endpoints (hosted by us) for
-	// users to call. not needed at the moment. only triggers once at the node
-	// start, to launch HTTP server. needs to be updated.
+	// users to call. only triggers once at the node starts, to launch HTTP
+	// server. needs to be updated.
 	actionsModule := actions.NewModule(ctx.JunoConfig, ctx.EncodingConfig)
 	// at genesis, gets and saves normal and vesting accounts
 	// regularly, (1) looks for MsgCreateVestingAccount messages and saves the
@@ -116,6 +121,8 @@ func (r *Registrar) BuildModules(ctx registrar.Context) jmodules.Modules {
 	// // govModule := gov.NewModule(sources.GovSource, distrModule, mintModule, slashingModule, stakingModule, cdc, db)
 	// // upgradeModule := upgrade.NewModule(db, stakingModule)
 
+	// this order is the order in which the modules' handle_X functions are called. we try to align it with
+	// SetOrderInitGenesis as much as possible.
 	return []jmodules.Module{
 		// saves messages verbatim (with some IBC parsing) for each msg.
 		messages.NewModule(r.parser, cdc, ctx.Database),
@@ -124,18 +131,43 @@ func (r *Registrar) BuildModules(ctx registrar.Context) jmodules.Modules {
 		// indexer-level pruning, at each block.
 		pruning.NewModule(ctx.JunoConfig, db, ctx.Logger),
 		actionsModule,
-		authModule,
-		bankModule,
 		consensusModule,
 		dailyRefetchModule,
-		feegrantModule,
 		messagetypeModule,
 		// saves a list of modules configured in the indexer, once.
 		modules.NewModule(ctx.JunoConfig.Chain, db),
 		// needs coingecko, so can't activate it yet.
 		// // pricefeed.NewModule(ctx.JunoConfig, cdc, db),
-		slashingModule,
+		// actual Cosmos (non-explorer) modules begin
+		authModule,
+		bankModule,
+		feegrantModule,
+		// authz.ModuleName,
+		// feemarkettypes.ModuleName,
 		epochs.NewModule(sources.EpochsSource, cdc, db),
+		// evmtypes.ModuleName,
 		exomint.NewModule(sources.ExomintSource, cdc, db),
+		assets.NewModule(sources.AssetsSource, cdc, db),
+		avs.NewModule(cdc, db),
+		operator.NewModule(cdc, db),
+		delegation.NewModule(sources.DelegationSource, cdc, db),
+		dogfood.NewModule(sources.DogfoodSource, cdc, db),
+		// stakingtypes.ModuleName,
+		slashingModule,
+		// evidencetypes.ModuleName,
+		// govtypes.ModuleName,
+		// erc20types.ModuleName,
+		// ibcexported.ModuleName,
+		// ibctransfertypes.ModuleName,
+		// icatypes.ModuleName,
+		// oracleTypes.ModuleName,
+		// paramstypes.ModuleName,
+		// vestingtypes.ModuleName,
+		// consensusparamtypes.ModuleName,
+		// upgradetypes.ModuleName,
+		// rewardTypes.ModuleName,
+		// exoslashTypes.ModuleName,
+		// distrtypes.ModuleName,
+		// crisistypes.ModuleName,
 	}
 }

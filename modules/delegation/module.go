@@ -1,10 +1,10 @@
-package assets
+package delegation
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/forbole/callisto/v4/database"
 
-	assetssource "github.com/forbole/callisto/v4/modules/assets/source"
+	delegationsource "github.com/forbole/callisto/v4/modules/delegation/source"
 	"github.com/forbole/juno/v5/modules"
 )
 
@@ -13,18 +13,17 @@ var (
 	_ modules.GenesisModule     = &Module{}
 	_ modules.TransactionModule = &Module{}
 	_ modules.BlockModule       = &Module{}
-	_ modules.MessageModule     = &Module{}
 )
 
 // Module implements x/assets module indexer
 type Module struct {
 	cdc    codec.Codec
 	db     *database.Db
-	source assetssource.Source
+	source delegationsource.Source
 }
 
 // NeawModule builds a new Module instance
-func NewModule(source assetssource.Source, cdc codec.Codec, db *database.Db) *Module {
+func NewModule(source delegationsource.Source, cdc codec.Codec, db *database.Db) *Module {
 	return &Module{
 		cdc:    cdc,
 		db:     db,
@@ -34,5 +33,5 @@ func NewModule(source assetssource.Source, cdc codec.Codec, db *database.Db) *Mo
 
 // Name implements modules.Module
 func (m *Module) Name() string {
-	return "assets"
+	return "delegation"
 }

@@ -1,10 +1,9 @@
-package assets
+package avs
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/forbole/callisto/v4/database"
 
-	assetssource "github.com/forbole/callisto/v4/modules/assets/source"
 	"github.com/forbole/juno/v5/modules"
 )
 
@@ -13,26 +12,23 @@ var (
 	_ modules.GenesisModule     = &Module{}
 	_ modules.TransactionModule = &Module{}
 	_ modules.BlockModule       = &Module{}
-	_ modules.MessageModule     = &Module{}
 )
 
 // Module implements x/assets module indexer
 type Module struct {
-	cdc    codec.Codec
-	db     *database.Db
-	source assetssource.Source
+	cdc codec.Codec
+	db  *database.Db
 }
 
-// NeawModule builds a new Module instance
-func NewModule(source assetssource.Source, cdc codec.Codec, db *database.Db) *Module {
+// NewModule builds a new Module instance
+func NewModule(cdc codec.Codec, db *database.Db) *Module {
 	return &Module{
-		cdc:    cdc,
-		db:     db,
-		source: source,
+		cdc: cdc,
+		db:  db,
 	}
 }
 
 // Name implements modules.Module
 func (m *Module) Name() string {
-	return "assets"
+	return "avs"
 }

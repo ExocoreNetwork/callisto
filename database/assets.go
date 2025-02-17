@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	assetstypes "github.com/ExocoreNetwork/exocore/x/assets/types"
 	"github.com/forbole/callisto/v4/types"
 )
 
@@ -32,13 +31,18 @@ WHERE assets_params.height <= excluded.height`
 }
 
 // SaveClientChain inserts or updates a client chain record in the database
-func (db *Db) SaveOrUpdateClientChain(chain assetstypes.ClientChainInfo) error {
-	// this can not be edited, except in the case of a chain restart.
-	// in that event, the index should be regenerated.
+func (db *Db) SaveOrUpdateClientChain(chain *types.ClientChain) error {
 	stmt := `
 INSERT INTO client_chains (name, meta_info, chain_id, exocore_chain_index, finalization_blocks, layer_zero_chain_id, signature_type, address_length)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-ON CONFLICT (exocore_chain_index) DO NOTHING`
+ON CONFLICT (layer_zero_chain_id) DO UPDATE
+	SET name = EXCLUDED.name,
+		meta_info = EXCLUDED.meta_info,
+		chain_id = EXCLUDED.chain_id,
+		finalization_blocks = EXCLUDED.finalization_blocks,
+		layer_zero_chain_id = EXCLUDED.layer_zero_chain_id,
+		signature_type = EXCLUDED.signature_type,
+		address_length = EXCLUDED.address_length;`
 
 	_, err := db.SQL.Exec(stmt,
 		chain.Name,
@@ -56,15 +60,14 @@ ON CONFLICT (exocore_chain_index) DO NOTHING`
 	return nil
 }
 
-// SaveToken saves a token record into the database. Once added, only the
+// SaveAssetsToken saves a token record into the database. Once added, only the
 // metadata may be altered by the blockchain.
-func (db *Db) SaveToken(tokenInput assetstypes.StakingAssetInfo) error {
-	// drop the total deposit amount or retain?
-	// slashing is applied to staker level, not the deposit amount.
-	// so it is a good thing to retain the total deposit amount.
-	token := tokenInput.AssetBasicInfo
+func (db *Db) SaveAssetsToken(token *types.AssetsToken) error {
+	// Q. drop the total deposit amount or retain?
+	// A. slashing is applied to staker level, not the deposit amount.
+	//    so it is a good thing to retain the total deposit amount.
 	stmt := `
-INSERT INTO tokens (asset_id, name, symbol, address, decimals, layer_zero_chain_id, exocore_chain_index, meta_info, staking_total_amount)
+INSERT INTO assets_tokens (asset_id, name, symbol, address, decimals, layer_zero_chain_id, exocore_chain_index, meta_info, staking_total_amount)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 ON CONFLICT (asset_id) DO UPDATE
 SET name = EXCLUDED.name,
@@ -76,7 +79,7 @@ SET name = EXCLUDED.name,
     meta_info = EXCLUDED.meta_info
 	staking_total_amount = EXCLUDED.staking_total_amount;`
 	_, err := db.SQL.Exec(stmt,
-		token.AssetID(),
+		token.AssetID,
 		token.Name,
 		token.Symbol,
 		token.Address,
@@ -84,7 +87,7 @@ SET name = EXCLUDED.name,
 		token.LayerZeroChainID,
 		token.ExocoreChainIndex,
 		token.MetaInfo,
-		tokenInput.StakingTotalAmount,
+		token.Amount,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to save token: %w", err)
@@ -92,21 +95,39 @@ SET name = EXCLUDED.name,
 	return nil
 }
 
-// UpdateAssetMetadata updates the metadata for an asset based on its
-// address and LayerZero chain ID.
+// UpdateAssetMetadata updates the metadata for an asset based on its assetID.
 func (db *Db) UpdateAssetMetadata(
-	address string, layerZeroChainID int64, newMetaInfo string,
+	assetID string, newMetaInfo string,
 ) error {
 	stmt := `
-UPDATE assets
+UPDATE tokens
 SET meta_info = $1
-WHERE address = $2 AND layer_zero_chain_id = $3;`
-
-	_, err := db.SQL.Exec(stmt, newMetaInfo, address, layerZeroChainID)
+WHERE asset_id = $2;`
+	// no conflict can happen above since it is update
+	// we don't check for existence because again, we are not a business logic implementation
+	_, err := db.SQL.Exec(stmt, newMetaInfo, assetID)
 	if err != nil {
 		return fmt.Errorf(
-			"failed to update metadata for address %s on chain %d: %w",
-			address, layerZeroChainID, err,
+			"failed to update metadata for asset_id %s: %w",
+			assetID, err,
+		)
+	}
+	return nil
+}
+
+// UpdateStakingTotalAmount updates the total staking amount for an asset based on its assetID.
+func (db *Db) UpdateStakingTotalAmount(
+	assetID string, newAmount string,
+) error {
+	stmt := `
+UPDATE tokens
+SET staking_total_amount = $1
+WHERE asset_id = $2;`
+	_, err := db.SQL.Exec(stmt, newAmount, assetID)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to update staking total amount for asset_id %s: %w",
+			assetID, err,
 		)
 	}
 	return nil
@@ -115,92 +136,69 @@ WHERE address = $2 AND layer_zero_chain_id = $3;`
 // SaveStakerAsset saves a staker asset record in the database, including
 // an entry in the history table.
 func (db *Db) SaveStakerAsset(data *types.StakerAsset) error {
-	if err := db.UpsertStakerAsset(data); err != nil {
-		return err
-	}
-	if err := db.InsertStakerAssetHistory(data); err != nil {
-		return err
-	}
-	return nil
-}
+	var stmt string
+	var args []interface{}
 
-// UpsertStakerAsset inserts or updates a staker asset record in the database.
-func (db *Db) UpsertStakerAsset(data *types.StakerAsset) error {
-	stmt := `
-INSERT INTO staker_assets (staker_id, asset_id, deposited, free, delegated, pending_undelegation)
+	if data.AdditionalSlashed != "" {
+		// Add the new slashed amount to the existing one in the DB
+		stmt = `
+INSERT INTO staker_assets (staker_id, asset_id, deposited, withdrawable, pending_undelegation, lifetime_slashed)
 VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT (staker_id, asset_id) DO UPDATE
 SET deposited = EXCLUDED.deposited,
-	free = EXCLUDED.free,
-	delegated = EXCLUDED.delegated,
-	pending_undelegation = EXCLUDED.pending_undelegation;`
-	_, err := db.SQL.Exec(
-		stmt, data.StakerID, data.AssetID,
-		data.Deposited, data.Free, data.Delegated, data.PendingUndelegation,
-	)
+	withdrawable = EXCLUDED.withdrawable,
+	pending_undelegation = EXCLUDED.pending_undelegation,
+	lifetime_slashed = staker_assets.lifetime_slashed + EXCLUDED.lifetime_slashed,
+	delegated = EXCLUDED.deposited - EXCLUDED.withdrawable - EXCLUDED.pending_undelegation - (staker_assets.lifetime_slashed + EXCLUDED.lifetime_slashed);`
+		args = []interface{}{
+			data.StakerID, data.AssetID,
+			data.Deposited, data.Withdrawable,
+			data.PendingUndelegation, data.AdditionalSlashed,
+		}
+	} else {
+		// No slashing update, just recalculate delegated
+		stmt = `
+INSERT INTO staker_assets (staker_id, asset_id, deposited, withdrawable, pending_undelegation)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (staker_id, asset_id) DO UPDATE
+SET deposited = EXCLUDED.deposited,
+	withdrawable = EXCLUDED.withdrawable,
+	pending_undelegation = EXCLUDED.pending_undelegation,
+	delegated = EXCLUDED.deposited - EXCLUDED.withdrawable - EXCLUDED.pending_undelegation - staker_assets.lifetime_slashed;`
+		args = []interface{}{
+			data.StakerID, data.AssetID,
+			data.Deposited, data.Withdrawable,
+			data.PendingUndelegation,
+		}
+	}
+
+	_, err := db.SQL.Exec(stmt, args...)
 	if err != nil {
-		return fmt.Errorf("failed to upsert staker asset: %w", err)
+		return fmt.Errorf("failed to save staker asset: %w", err)
 	}
 	return nil
 }
 
-// InsertStakerAssetHistory inserts a staker asset history record in the database.
-func (db *Db) InsertStakerAssetHistory(data *types.StakerAsset) error {
-	stmt := `
-INSERT INTO staker_assets_history (staker_id, asset_id, deposited, free, delegated, pending_undelegation, block_height)
-VALUES ($1, $2, $3, $4, $5, $6, $7);
-    `
-	_, err := db.SQL.Exec(
-		stmt, data.StakerID, data.AssetID,
-		data.Deposited, data.Free, data.Delegated, data.PendingUndelegation, data.Height,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to update staker asset history: %w", err)
-	}
-	return nil
-}
-
-// SaveOperatorAsset saves an operator asset record in the database, including
-// an entry in the history table.
+// SaveOperatorAsset saves an operator asset record in the database,
+// ensuring other_share is derived as total_share - self_share.
+// This function is in `assets.go` because it is triggered by events in `x/assets`.
 func (db *Db) SaveOperatorAsset(data *types.OperatorAsset) error {
-	if err := db.UpsertOperatorAsset(data); err != nil {
-		return err
-	}
-	if err := db.InsertOperatorAssetHistory(data); err != nil {
-		return err
-	}
-	return nil
-}
-
-// UpsertOperatorAsset inserts or updates an operator asset record in the database.
-func (db *Db) UpsertOperatorAsset(data *types.OperatorAsset) error {
 	stmt := `
-INSERT INTO operator_assets (operator, asset_id, delegated, pending_undelegation, share, self_share, delegated_share)
-VALUES ($1, $2, $3, $4, $5, $6, $7);`
+INSERT INTO operator_assets (operator_addr, asset_id, total_amount, pending_undelegation_amount, total_share, self_share, other_share)
+VALUES ($1, $2, $3, $4, $5, $6, $5 - $6)
+ON CONFLICT (operator_addr, asset_id) DO UPDATE
+SET total_amount = EXCLUDED.total_amount,
+	pending_undelegation_amount = EXCLUDED.pending_undelegation_amount,
+	total_share = EXCLUDED.total_share,
+	self_share = EXCLUDED.self_share,
+	other_share = EXCLUDED.total_share - EXCLUDED.self_share;`
 	_, err := db.SQL.Exec(
 		stmt, data.OperatorAddress, data.AssetID,
-		data.Delegated, data.PendingUndelegation,
-		data.Share, data.SelfShare, data.DelegatedShare,
+		data.TotalAmount, data.PendingUndelegationAmount,
+		data.TotalShare, data.SelfShare,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to upsert operator asset: %w", err)
-	}
-	return nil
-}
-
-// InsertOperatorAssetHistory inserts an operator asset history record in the database.
-func (db *Db) InsertOperatorAssetHistory(data *types.OperatorAsset) error {
-	stmt := `
-INSERT INTO operator_assets_history (operator, asset_id, delegated, pending_undelegation, share, self_share, delegated_share, block_height)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
-	_, err := db.SQL.Exec(
-		stmt, data.OperatorAddress, data.AssetID,
-		data.Delegated, data.PendingUndelegation,
-		data.Share, data.SelfShare, data.DelegatedShare,
-		data.Height,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to update operator asset history: %w", err)
+		return fmt.Errorf("failed to save operator asset: %w", err)
 	}
 	return nil
 }

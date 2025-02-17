@@ -1,4 +1,3 @@
-/* ---- PARAMS ---- */
 -- single row because the params history is not relevant and not changing often
 CREATE TABLE exomint_params
 (
@@ -7,6 +6,8 @@ CREATE TABLE exomint_params
     height     BIGINT  NOT NULL,
     CHECK (one_row_id)
 );
+
+-- track mint history for showing it as events
 CREATE TABLE exomint_history (
     block_height BIGINT PRIMARY KEY,
     quantity_minted NUMERIC NOT NULL,

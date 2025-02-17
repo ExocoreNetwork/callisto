@@ -15,7 +15,7 @@ var (
 	_ exomintsource.Source = &Source{}
 )
 
-// Source implements epochssource.Source using a local node
+// Source implements exomintsource.Source using a local node
 type Source struct {
 	*local.Source
 	querier exominttypes.QueryServer

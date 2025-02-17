@@ -12,7 +12,7 @@ var (
 	_ exomintsource.Source = &Source{}
 )
 
-// Source implements epochssource.Source using a remote node
+// Source implements exomintsource.Source using a remote node
 type Source struct {
 	*remote.Source
 	querier exominttypes.QueryClient

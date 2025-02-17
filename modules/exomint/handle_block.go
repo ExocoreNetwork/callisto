@@ -17,6 +17,7 @@ import (
 func (m *Module) HandleBlock(
 	block *tmctypes.ResultBlock, res *tmctypes.ResultBlockResults, _ []*juno.Tx, _ *tmctypes.ResultValidators,
 ) error {
+	// x/exomint does not have anything to do with txs or end blocker
 	if err := m.saveMintHistory(block.Block.Height, res.BeginBlockEvents); err != nil {
 		return fmt.Errorf("error while saving mint history: %s", err)
 	}
