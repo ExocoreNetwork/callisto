@@ -31,13 +31,6 @@ array_relationships:
       table:
         name: delegation_states
         schema: public
-- name: exo_asset_delegations
-  using:
-    foreign_key_constraint_on:
-      column: operator_addr
-      table:
-        name: exo_asset_delegation
-        schema: public
 - name: operator_asset_stakers
   using:
     foreign_key_constraint_on:

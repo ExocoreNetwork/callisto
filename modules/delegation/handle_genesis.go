@@ -45,6 +45,8 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 		// this is because the exoAssetDelegation is not tracked in the assets module.
 		// the delegation module tracks it with a different logic, which we work around here.
 		if keys.AssetId == assetstypes.ExocoreAssetID {
+			// TODO: instead of GetDelegatedAmount, can we consider `TotalDelegatedAmountForStakerAsset` ?
+			// the advantage of that function, if implemented, is that it does not need the operator address.
 			delegatedAmount, err := m.source.GetDelegatedAmount(
 				doc.InitialHeight, keys.StakerId, keys.AssetId, keys.OperatorAddr,
 			)
@@ -52,7 +54,7 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 				return fmt.Errorf("error while getting delegated amount: %s", err)
 			}
 			delegation := types.NewExoAssetDelegationFromStr(
-				keys.StakerId, keys.OperatorAddr, delegatedAmount.String(),
+				keys.StakerId, delegatedAmount.String(),
 				state.States.WaitUndelegationAmount.String(),
 			)
 			if err := m.db.AccumulateExoAssetDelegation(delegation); err != nil {

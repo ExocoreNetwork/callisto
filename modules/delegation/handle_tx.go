@@ -210,16 +210,12 @@ func (m *Module) handleExoAssetDelegations(events []abci.Event) error {
 		if err != nil {
 			return fmt.Errorf("error while finding staker ID: %s", err)
 		}
-		operatorAddr, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyOperatorAddr)
-		if err != nil {
-			return fmt.Errorf("error while finding operator address: %s", err)
-		}
 		amount, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyAmount)
 		if err != nil {
 			return fmt.Errorf("error while finding amount: %s", err)
 		}
 		delegation := types.NewExoAssetDelegationFromStr(
-			stakerID.Value, operatorAddr.Value, amount.Value, "0",
+			stakerID.Value, amount.Value, "0",
 		)
 		if err := m.db.AccumulateExoAssetDelegation(delegation); err != nil {
 			return fmt.Errorf("error while accumulating exo asset delegation: %s", err)
@@ -285,7 +281,7 @@ func (m *Module) handleUndelegationStarts(events []abci.Event) error {
 		// (1) pending_undelegation += amount
 		// (2) delegated -= amount
 		if assetID.Value == assetstypes.ExocoreAssetID {
-			if err := m.db.UndelegateExoAsset(stakerID.Value, operatorAddr.Value, amount.Value); err != nil {
+			if err := m.db.UndelegateExoAsset(stakerID.Value, amount.Value); err != nil {
 				return fmt.Errorf("error while undelegating exo asset: %s", err)
 			}
 		}

@@ -72,13 +72,8 @@ func (m *Module) handleUndelegationCompletions(height int64, events []abci.Event
 			return fmt.Errorf("error while getting staker ID and asset ID from undelegation record: %s", err)
 		}
 		if assetID == assetstypes.ExocoreAssetID {
-			// there is no staker asset for exocore asset, so we operate on
-			// exo_asset_delegation's pending_undelegation amount.
-			operatorAddr, err := m.db.GetOperatorAddrFromUndelegationRecord(recordID.Value)
-			if err != nil {
-				return fmt.Errorf("error while getting operator address from undelegation record: %s", err)
-			}
-			if err := m.db.MatureExoAssetUndelegation(stakerID, operatorAddr, amount.Value); err != nil {
+			// reduce the pending undelegation amount
+			if err := m.db.MatureExoAssetUndelegation(stakerID, amount.Value); err != nil {
 				return fmt.Errorf("error while maturing exo asset undelegation: %s", err)
 			}
 		}
@@ -150,7 +145,7 @@ func (m *Module) handleDelegationSlashings(height int64, events []abci.Event) er
 				}
 			} else {
 				if err := m.db.SlashExoAssetDelegation(
-					stakerID, operatorAddr.Value, slashedAmount.String(),
+					stakerID, slashedAmount.String(),
 				); err != nil {
 					return fmt.Errorf("error while slashing exo asset delegation: %s", err)
 				}

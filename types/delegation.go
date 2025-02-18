@@ -107,11 +107,12 @@ func NewUndelegationRecord(
 	)
 }
 
-// ExoAssetDelegation is the delegation state indexed by staker_id + operator_addr.
-// It tracks the delegated amount, the amount pending undelegation, and the amount slashed.
+// ExoAssetDelegation is the delegation state indexed by staker_id. It is equivalent to
+// the staker_assets table, but without the asset_id column.
+// It tracks the delegated amount, the amount pending undelegation, and the amount slashed (
+// via events, so not pictured here).
 type ExoAssetDelegation struct {
 	StakerID            string
-	OperatorAddr        string
 	Delegated           string
 	PendingUndelegation string
 }
@@ -119,11 +120,10 @@ type ExoAssetDelegation struct {
 // NewExoAssetDelegationFromStr creates a new ExoAssetDelegation instance using the given values in
 // string format.
 func NewExoAssetDelegationFromStr(
-	stakerID, operatorAddr, delegated, pendingUndelegation string,
+	stakerID, delegated, pendingUndelegation string,
 ) *ExoAssetDelegation {
 	return &ExoAssetDelegation{
 		StakerID:            stakerID,
-		OperatorAddr:        operatorAddr,
 		Delegated:           delegated,
 		PendingUndelegation: pendingUndelegation,
 	}

@@ -5,7 +5,8 @@
 CREATE TABLE exo_asset_delegation (
     -- include the staker_id _0x0 suffix for ease of use with the other tables
     staker_id TEXT NOT NULL,
-    operator_addr TEXT NOT NULL,
+    -- no need to store operator_addr because this is the equivalent of the
+    -- staker_assets table, which also does not store operator_addr
     -- derived from the delegation events
     delegated NUMERIC NOT NULL DEFAULT 0,
     -- derived from the undelegation events
@@ -17,8 +18,7 @@ CREATE TABLE exo_asset_delegation (
     -- cumulative, derived from the slashing events
     lifetime_slashed NUMERIC NOT NULL DEFAULT 0,
     -- no constraints on the amount because no deposits or withdrawals permitted
-    PRIMARY KEY (staker_id, operator_addr),
-    CONSTRAINT fk_operator FOREIGN KEY (operator_addr) REFERENCES operators (earnings_addr)
+    PRIMARY KEY (staker_id),
 );
 
 -- state<staker_id + asset_id + operator>

@@ -10,7 +10,6 @@ select_permissions:
     allow_aggregations: false
     columns:
     - staker_id
-    - operator_addr
     - delegated
     - pending_undelegation
     - lifetime_slashed
