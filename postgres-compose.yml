@@ -6,13 +6,14 @@ services:
     image: postgres:15
     container_name: bdjuno-cleanup
     command: >
-      sh -c "
-      if [ \"${RESET_DB}\" = \"true\" ]; then
-        echo 'RESET_DB is true. Cleaning up db_data...';
-        rm -rf /var/lib/postgresql/data/*;
+      sh -c '
+      if [ "${RESET_DB}" = "true" ]; then
+        echo "RESET_DB is true. Cleaning up db_data...";
+        find /var/lib/postgresql/data -mindepth 1 -delete;
+        chmod 700 /var/lib/postgresql/data;
       else
-        echo 'RESET_DB is false. Skipping cleanup.';
-      fi"
+        echo "RESET_DB is false. Skipping cleanup.";
+      fi'
     volumes:
       - ./db_data:/var/lib/postgresql/data
     environment:
@@ -32,8 +33,6 @@ services:
     depends_on:
       cleanup:
         condition: service_completed_successfully
-    ports:
-      - "5432:5432"
     volumes:
       - ./db_data:/var/lib/postgresql/data
 
@@ -71,13 +70,12 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      HASURA_GRAPHQL_MIGRATIONS_DIR: /hasura-migrations
-      HASURA_GRAPHQL_METADATA_DIR: /hasura-metadata
+      HASURA_GRAPHQL_MIGRATIONS_DIR: /hasura/migrations
+      HASURA_GRAPHQL_METADATA_DIR: /hasura/metadata
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
       HASURA_GRAPHQL_ADMIN_SECRET: "secret"
     volumes:
-      - ./hasura/migrations:/hasura-migrations
-      - ./hasura/metadata:/hasura-metadata
+      - ./hasura:/hasura
     depends_on:
       setup:
         condition: service_completed_successfully
@@ -89,23 +87,10 @@ services:
       - ./hasura:/hasura
     environment:
       HASURA_GRAPHQL_ENDPOINT: http://hasura:8080
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
+      HASURA_GRAPHQL_ADMIN_SECRET: "secret"
       RESET_METADATA: "${RESET_METADATA:-false}"
+      ACTION_BASE_URL: "http://localhost:8080"
     depends_on:
       - hasura
-    command: >
-      sh -c "
-      apt-get update && apt-get install -y curl;
-      curl -L https://github.com/hasura/graphql-engine/releases/download/v2.0.4/cli-hasura-linux-amd64 -o /usr/local/bin/hasura &&
-      chmod +x /usr/local/bin/hasura;
-      mkdir -p /root/.hasura/cli-ext/v2.0.4/;
-      curl -L -o /root/.hasura/cli-ext/v2.0.4/cli-ext https://github.com/hasura/graphql-engine/releases/download/v2.0.4/cli-ext-linux-amd64 &&
-      chmod +x /root/.hasura/cli-ext/v2.0.4/cli-ext;
-      if [ \"${RESET_METADATA}\" = \"true\" ]; then
-        echo 'Clearing old metadata...';
-        rm -rf /hasura/metadata/*;
-        cd /hasura;
-        hasura metadata clear;
-        hasura metadata apply;
-        hasura metadata reload;
-        hasura metadata export;
-      fi"
+    entrypoint: ["/bin/bash", "/hasura/metadata-entrypoint.sh"]

@@ -18,7 +18,7 @@ CREATE TABLE exo_asset_delegation (
     -- cumulative, derived from the slashing events
     lifetime_slashed NUMERIC NOT NULL DEFAULT 0,
     -- no constraints on the amount because no deposits or withdrawals permitted
-    PRIMARY KEY (staker_id),
+    PRIMARY KEY (staker_id)
 );
 
 -- state<staker_id + asset_id + operator>
