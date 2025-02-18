@@ -77,7 +77,6 @@ select_permissions:
 - permission:
     allow_aggregations: false
     columns:
-    - operator_addr
     - earnings_addr
     - approve_addr
     - operator_meta_info

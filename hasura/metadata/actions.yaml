@@ -1,20 +1,15 @@
-############### ACTIONS ###############
 actions:
-
-##### Bank #####
 - name: action_account_balance
   definition:
-    kind: synchronous
-    handler: "{{ACTION_BASE_URL}}/account_balance"
-    output_type: ActionBalance
-    arguments:
-    - name: address
-      type: String!
-    - name: height
-      type: Int
-    type: query
+    kind: ""
+    handler: '{{ACTION_BASE_URL}}/account_balance'
     headers:
     - value: application/json
       name: Content-Type
-  permissions:
-  - role: anonymous
+custom_types:
+  enums: []
+  input_objects: []
+  objects:
+  - name: ActionBalance
+  scalars:
+  - name: ActionCoin

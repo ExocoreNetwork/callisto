@@ -74,6 +74,7 @@ services:
       HASURA_GRAPHQL_METADATA_DIR: /hasura/metadata
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
       HASURA_GRAPHQL_ADMIN_SECRET: "secret"
+      ACTION_BASE_URL: "http://localhost:3000"
     volumes:
       - ./hasura:/hasura
     depends_on:
