@@ -107,11 +107,11 @@ func (db *Db) DeleteAllStakersFromOperatorAsset(operatorAddr, assetID string) er
 func (db *Db) SaveUndelegationRecord(record *types.UndelegationRecord) error {
 	stmt := `
     INSERT INTO undelegation_records (
-        record_id, staker_id, asset_id, operator_addr, tx_hash, 
-        block_number, completed_epoch_identifier, completed_epoch_number, 
-        undelegation_id, amount, actual_completed_amount, hold_count
+        record_id, staker_id, asset_id, operator_addr, tx_hash,
+        block_number, scheduled_block_number, lz_tx_nonce, amount,
+		actual_completed_amount, hold_count
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     ON CONFLICT (record_id) DO UPDATE
     SET 
         actual_completed_amount = EXCLUDED.actual_completed_amount,
@@ -119,9 +119,8 @@ func (db *Db) SaveUndelegationRecord(record *types.UndelegationRecord) error {
 
 	_, err := db.SQL.Exec(stmt,
 		record.RecordID, record.StakerID, record.AssetID, record.OperatorAddr,
-		record.TxHash, record.BlockNumber, record.CompletedEpochIdentifier,
-		record.CompletedEpochNumber, record.UndelegationID, record.Amount,
-		record.ActualCompletedAmount, record.HoldCount)
+		record.TxHash, record.BlockNumber, record.ScheduledBlockNumber,
+		record.LzTxNonce, record.Amount, record.ActualCompletedAmount, record.HoldCount)
 	if err != nil {
 		return fmt.Errorf("failed to save undelegation record: %w", err)
 	}

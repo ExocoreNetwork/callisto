@@ -48,40 +48,39 @@ func NewDelegationState(
 // UndelegationRecord is the record indexed by record_id. It is the equivalent of
 // `delegationtypes.UndelegationRecord` with additional `RecordID` and `HoldCount` fields.
 type UndelegationRecord struct {
-	RecordID                 string
-	StakerID                 string
-	AssetID                  string
-	OperatorAddr             string
-	TxHash                   string
-	BlockNumber              string
-	CompletedEpochIdentifier string
-	CompletedEpochNumber     string
-	UndelegationID           string
-	Amount                   string
-	ActualCompletedAmount    string
-	HoldCount                string
+	RecordID              string
+	StakerID              string
+	AssetID               string
+	OperatorAddr          string
+	TxHash                string
+	BlockNumber           string
+	ScheduledBlockNumber  string
+	LzTxNonce             string
+	Amount                string
+	ActualCompletedAmount string
+	HoldCount             string
 }
 
 // NewUndelegationRecordFromStr creates a new UndelegationRecord instance using the given values in
 // string format.
 func NewUndelegationRecordFromStr(
 	recordID, stakerID, assetID,
-	operatorAddr, txHash, blockNumber,
-	completedEpochIdentifier, completedEpochNumber,
-	undelegationID, amount, actualCompletedAmount,
+	operatorAddr, txHash, blockNumber, scheduledBlockNumber,
+	lzTxNonce, amount, actualCompletedAmount,
 	holdCount string,
 ) *UndelegationRecord {
 	return &UndelegationRecord{
-		RecordID:                 recordID,
-		StakerID:                 stakerID,
-		AssetID:                  assetID,
-		OperatorAddr:             operatorAddr,
-		TxHash:                   txHash,
-		BlockNumber:              blockNumber,
-		CompletedEpochIdentifier: completedEpochIdentifier,
-		CompletedEpochNumber:     completedEpochNumber,
-		UndelegationID:           undelegationID,
-		Amount:                   amount,
+		RecordID:              recordID,
+		StakerID:              stakerID,
+		AssetID:               assetID,
+		OperatorAddr:          operatorAddr,
+		TxHash:                txHash,
+		BlockNumber:           blockNumber,
+		ScheduledBlockNumber:  scheduledBlockNumber,
+		LzTxNonce:             lzTxNonce,
+		Amount:                amount,
+		ActualCompletedAmount: actualCompletedAmount,
+		HoldCount:             holdCount,
 	}
 }
 
@@ -93,14 +92,13 @@ func NewUndelegationRecord(
 ) *UndelegationRecord {
 	return NewUndelegationRecordFromStr(
 		hexutil.Encode(undelegationRecord.GetKey()),
-		undelegationRecord.StakerId,
-		undelegationRecord.AssetId,
+		undelegationRecord.StakerID,
+		undelegationRecord.AssetID,
 		undelegationRecord.OperatorAddr,
 		undelegationRecord.TxHash,
 		fmt.Sprintf("%d", undelegationRecord.BlockNumber),
-		undelegationRecord.CompletedEpochIdentifier,
-		fmt.Sprintf("%d", undelegationRecord.CompletedEpochNumber),
-		fmt.Sprintf("%d", undelegationRecord.UndelegationId),
+		fmt.Sprintf("%d", undelegationRecord.CompleteBlockNumber),
+		fmt.Sprintf("%d", undelegationRecord.LzTxNonce),
 		undelegationRecord.Amount.String(),
 		undelegationRecord.ActualCompletedAmount.String(),
 		fmt.Sprintf("%d", holdCount),

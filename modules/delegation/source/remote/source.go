@@ -37,8 +37,8 @@ func (s Source) GetDelegatedAmount(
 	res, err := s.querier.QuerySingleDelegationInfo(
 		ctx,
 		&delegationtypes.SingleDelegationInfoReq{
-			StakerId:     stakerID,
-			AssetId:      assetID,
+			StakerID:     stakerID,
+			AssetID:      assetID,
 			OperatorAddr: operatorAddr,
 		},
 	)

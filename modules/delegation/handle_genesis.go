@@ -26,7 +26,7 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 
 	// associations
 	for _, association := range genState.Associations {
-		if err := m.db.SaveStakerOperatorAssociation(association.StakerId, association.Operator); err != nil {
+		if err := m.db.SaveStakerOperatorAssociation(association.StakerID, association.Operator); err != nil {
 			return fmt.Errorf("error while saving association: %s", err)
 		}
 	}
@@ -37,24 +37,24 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 		if err != nil {
 			return fmt.Errorf("error while parsing delegation state key: %s", err)
 		}
-		wrappedState := types.NewDelegationState(keys.StakerId, keys.AssetId, keys.OperatorAddr, &state.States)
+		wrappedState := types.NewDelegationState(keys.StakerID, keys.AssetID, keys.OperatorAddr, &state.States)
 		if err := m.db.SaveDelegationState(wrappedState); err != nil {
 			return fmt.Errorf("error while saving delegation state: %s", err)
 		}
 		// capture the exoAssetDelegation state manually.
 		// this is because the exoAssetDelegation is not tracked in the assets module.
 		// the delegation module tracks it with a different logic, which we work around here.
-		if keys.AssetId == assetstypes.ExocoreAssetID {
+		if keys.AssetID == assetstypes.ExocoreAssetID {
 			// TODO: instead of GetDelegatedAmount, can we consider `TotalDelegatedAmountForStakerAsset` ?
 			// the advantage of that function, if implemented, is that it does not need the operator address.
 			delegatedAmount, err := m.source.GetDelegatedAmount(
-				doc.InitialHeight, keys.StakerId, keys.AssetId, keys.OperatorAddr,
+				doc.InitialHeight, keys.StakerID, keys.AssetID, keys.OperatorAddr,
 			)
 			if err != nil {
 				return fmt.Errorf("error while getting delegated amount: %s", err)
 			}
 			delegation := types.NewExoAssetDelegationFromStr(
-				keys.StakerId, delegatedAmount.String(),
+				keys.StakerID, delegatedAmount.String(),
 				state.States.WaitUndelegationAmount.String(),
 			)
 			if err := m.db.AccumulateExoAssetDelegation(delegation); err != nil {
@@ -79,8 +79,8 @@ func (m *Module) HandleGenesis(doc *tmtypes.GenesisDoc, appState map[string]json
 
 	// undelegation records and hold counts
 	for _, record := range genState.Undelegations {
-		// at genesis, the hold count is available in the record.
-		wrapped := types.NewUndelegationRecord(record.Undelegation, record.HoldCount)
+		// in v1.0.9, the hold count is not part of the genesis state.
+		wrapped := types.NewUndelegationRecord(&record, 0)
 		if err := m.db.SaveUndelegationRecord(wrapped); err != nil {
 			return fmt.Errorf("error while saving undelegation record: %s", err)
 		}

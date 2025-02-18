@@ -25,9 +25,8 @@ select_permissions:
     - operator_addr
     - tx_hash
     - block_number
-    - completed_epoch_identifier
-    - completed_epoch_number
-    - undelegation_id
+    - scheduled_block_number
+    - lz_tx_nonce
     - amount
     - actual_completed_amount
     - hold_count

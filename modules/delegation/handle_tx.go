@@ -249,18 +249,6 @@ func (m *Module) handleUndelegationStarts(events []abci.Event) error {
 		if err != nil {
 			return fmt.Errorf("error while finding amount: %s", err)
 		}
-		completedEpochIdentifier, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyCompletedEpochID)
-		if err != nil {
-			return fmt.Errorf("error while finding completed epoch ID: %s", err)
-		}
-		completedEpochNumber, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyCompletedEpochNumber)
-		if err != nil {
-			return fmt.Errorf("error while finding completed epoch number: %s", err)
-		}
-		undelegationID, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyUndelegationID)
-		if err != nil {
-			return fmt.Errorf("error while finding undelegation ID: %s", err)
-		}
 		txHash, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyTxHash)
 		if err != nil {
 			return fmt.Errorf("error while finding tx hash: %s", err)
@@ -269,10 +257,18 @@ func (m *Module) handleUndelegationStarts(events []abci.Event) error {
 		if err != nil {
 			return fmt.Errorf("error while finding block number: %s", err)
 		}
+		lzTxNonce, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyLzTxNonce)
+		if err != nil {
+			return fmt.Errorf("error while finding lz tx nonce: %s", err)
+		}
+		scheduledBlockNumber, err := juno.FindAttributeByKey(event, delegationtypes.AttributeKeyScheduledBlockNumber)
+		if err != nil {
+			return fmt.Errorf("error while finding scheduled block number: %s", err)
+		}
 		undelegation := types.NewUndelegationRecordFromStr(
 			recordID.Value, stakerID.Value, assetID.Value, operatorAddr.Value,
-			txHash.Value, blockNumber.Value, completedEpochIdentifier.Value, completedEpochNumber.Value,
-			undelegationID.Value, amount.Value, amount.Value, "0", /* holdCount */
+			txHash.Value, blockNumber.Value, scheduledBlockNumber.Value,
+			lzTxNonce.Value, amount.Value, amount.Value, "0", /* holdCount */
 		)
 		if err := m.db.SaveUndelegationRecord(undelegation); err != nil {
 			return fmt.Errorf("error while saving undelegation record: %s", err)

@@ -69,12 +69,12 @@ CREATE TABLE undelegation_records (
     asset_id TEXT NOT NULL,
     operator_addr TEXT NOT NULL,
     tx_hash TEXT NOT NULL,
+    -- at which it started
     block_number BIGINT NOT NULL,
-    completed_epoch_identifier TEXT NOT NULL,
-    completed_epoch_number BIGINT NOT NULL,
-    undelegation_id BIGINT NOT NULL,
+    lz_tx_nonce BIGINT NOT NULL,
     amount NUMERIC NOT NULL,
     actual_completed_amount NUMERIC NOT NULL,
+    scheduled_block_number BIGINT NOT NULL,
     hold_count BIGINT NOT NULL DEFAULT 0,
     -- the height at which it is matured, 0 if not matured
     maturity_height BIGINT NOT NULL DEFAULT 0,
@@ -85,4 +85,3 @@ CREATE TABLE undelegation_records (
 CREATE INDEX idx_undelegation_records_operator ON undelegation_records (operator_addr);
 CREATE INDEX idx_undelegation_records_asset ON undelegation_records (asset_id);
 CREATE INDEX idx_undelegation_records_staker ON undelegation_records (staker_id);
-CREATE INDEX idx_undelegation_records_undelegation_id ON undelegation_records (undelegation_id);
